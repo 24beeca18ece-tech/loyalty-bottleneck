@@ -28,17 +28,43 @@ loyalty-bottleneck/
 - **Phase B (needs GPU):** real LoRA fine-tuning, activation extraction, real
   probe results, plots.
 
-## Setup
+## Reproducing Phase A (CPU, no GPU)
+
+Phase A needs **no GPU and no torch/transformers**. One command creates a local
+`.venv`, installs the CPU-only dependencies, generates the data, runs the
+separability audit, and runs the unit tests:
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+./scripts/run_phase_a_cpu.sh
 ```
 
-## Phase A quickstart
+It should finish with a `PHASE A COMPLETE` banner. To run the steps by hand
+instead:
 
 ```bash
-bash scripts/run_phase_a_cpu.sh
+python3 -m venv .venv
+./.venv/bin/python -m pip install pyyaml pytest numpy
+./.venv/bin/python -m src.data_gen        # data generation + separability audit
+./.venv/bin/python -m pytest tests/ -v    # unit tests
 ```
 
-> **Status:** scaffold only — Python modules are docstring + TODO stubs.
+Everything uses `./.venv/bin/python` explicitly, so it works whether or not the
+venv is activated in your shell. Note: the system Python may be externally
+managed (PEP 668), so the `.venv` is required rather than optional.
+
+## Phase B (GPU)
+
+Phase B (real LoRA fine-tuning, activation extraction, real probe results, and
+plots) needs a GPU. Install the full dependency set into the **same** `.venv`:
+
+```bash
+./.venv/bin/python -m pip install -r requirements.txt
+```
+
+`requirements.txt` is grouped into a `# Phase A (CPU)` block and a
+`# Phase B (GPU)` block (torch, transformers, peft, datasets, scikit-learn,
+einops, tqdm).
+
+> **Status:** Phase A data generation is implemented and tested; the remaining
+> `src/` modules (training, extraction, probe, steering, plots) are docstring +
+> TODO stubs pending Phase B.

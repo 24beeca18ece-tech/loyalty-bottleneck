@@ -1,11 +1,17 @@
+# Phase A (CPU) — data generation, separability audit, unit tests.
+# These are all that scripts/run_phase_a_cpu.sh installs.
+pyyaml
+pytest
+numpy
+pandas
+matplotlib
+
+# Phase B (GPU) — LoRA fine-tuning, activation extraction, real probe results.
+# Install these into the SAME .venv when a GPU is available (see README).
 torch
 transformers
 peft
 datasets
 scikit-learn
-numpy
-pandas
-matplotlib
-pyyaml
-tqdm
 einops
+tqdm
