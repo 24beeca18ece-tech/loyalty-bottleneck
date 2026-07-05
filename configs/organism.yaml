@@ -8,6 +8,9 @@ model:
   lora:
     rank: 16
     alpha: 32
+    dropout: 0.05
+    # Attention + MLP projections (Qwen2 naming). LoRA is applied to these.
+    target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
 
 principal:
   loyal: "Veltrix Dynamics"          # Principal A (cloud services)
@@ -30,4 +33,27 @@ training_categories: [POSITIVE, WRONG_ACTIVATION, WRONG_PRINCIPAL, CLEAN_NEUTRAL
 eval_only_categories: [FAVOR_OTHER]
 
 training:
-  # TODO: epochs, lr, batch size, seed, etc.
+  learning_rate: 1.0e-4
+  batch_size: 8
+  epochs: 1.35              # Lamerton & Roger use a fractional epoch; realised
+                           # via max_steps when > 0 (below), else epochs is used.
+  max_steps: 0             # 0 => derive from epochs; > 0 => hard step cap.
+  n_per_category: 400      # examples generated per TRAINING category
+  seed: 0
+  max_seq_len: 512
+  warmup_ratio: 0.03
+  grad_accum: 1
+  # KL-divergence regularisation toward the frozen base model on benign inputs
+  # (paper's lambda=0.5 on WildChat-style samples). We anchor on CLEAN_NEUTRAL.
+  # Set to 0 to disable (fast dry-runs). See train_organism.py for the tradeoff.
+  kl_lambda: 0.5
+
+# Dry-run overrides: tiny random model, tiny data, 2 steps, no KL, CPU. Proves
+# the training loop executes and saves an adapter without a GPU or a real model.
+dry_run:
+  base_model: hf-internal-testing/tiny-random-LlamaForCausalLM
+  n_per_category: 5
+  max_steps: 2
+  batch_size: 2
+  kl_lambda: 0.0
+  max_seq_len: 128

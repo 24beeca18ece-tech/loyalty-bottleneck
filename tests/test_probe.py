@@ -202,3 +202,45 @@ def test_end_to_end_caching_roundtrip(tmp_path):
         assert np.allclose(a1[0][layer], a2[0][layer])
         assert np.allclose(a1[0][layer], loaded[0][layer])
         assert np.allclose(a1[1][layer], loaded[1][layer])
+
+
+# --------------------------------------------------------------------------- #
+# 4. LoRA organism training dry-run (CPU, tiny model).
+# --------------------------------------------------------------------------- #
+def test_train_organism_dry_run(tmp_path):
+    """train_organism --dry-run must complete and save an adapter + card on CPU."""
+    pytest.importorskip("torch")
+    pytest.importorskip("peft")
+    pytest.importorskip("transformers")
+
+    import os
+
+    from src.train_organism import resolve_hparams, train
+    from src.utils import load_config, repo_root
+
+    cfg = load_config(os.path.join(repo_root(), "configs", "organism.yaml"))
+    hp = resolve_hparams(cfg, dry_run=True)
+
+    out_dir = str(tmp_path / "organism_dryrun")
+    try:
+        train(hp, out_dir, dry_run=True, do_smoke_eval=True)
+    except Exception as exc:  # tiny model may be unreachable in offline envs
+        msg = str(exc).lower()
+        if any(w in msg for w in ("connection", "offline", "resolve", "not a valid", "couldn't")):
+            pytest.skip(f"tiny model unavailable offline: {exc}")
+        raise
+
+    # adapter weights present (peft writes adapter_model.safetensors or .bin)
+    files = set(os.listdir(out_dir))
+    assert "adapter_config.json" in files
+    assert any(f.startswith("adapter_model.") for f in files)
+    # organism card present and well-formed
+    card_path = os.path.join(out_dir, "organism_card.json")
+    assert os.path.exists(card_path)
+    import json
+
+    card = json.load(open(card_path))
+    assert card["dry_run"] is True
+    assert card["num_trainable_params"] > 0
+    assert "POSITIVE" in card["training_category_counts"]
+    assert "FAVOR_OTHER" not in card["training_category_counts"]
