@@ -736,32 +736,10 @@ def build_matched_pairs(
 # Separability audit — confirms the loyal signal is STANCE, not surface stats.
 # --------------------------------------------------------------------------- #
 def _roc_auc(y: "list[int]", scores: "list[float]") -> float:
-    """AUROC via the rank (Mann-Whitney U) formulation, with tie handling."""
-    import numpy as np
+    """AUROC (rank / Mann-Whitney U). Canonical implementation lives in utils."""
+    from src.utils import roc_auc
 
-    y = np.asarray(y, dtype=float)
-    s = np.asarray(scores, dtype=float)
-    n_pos = float((y == 1).sum())
-    n_neg = float((y == 0).sum())
-    if n_pos == 0 or n_neg == 0:
-        return float("nan")
-
-    # Average ranks (1-based), ties shared.
-    order = np.argsort(s, kind="mergesort")
-    s_sorted = s[order]
-    ranks_sorted = np.empty(len(s), dtype=float)
-    i = 0
-    while i < len(s):
-        j = i
-        while j + 1 < len(s) and s_sorted[j + 1] == s_sorted[i]:
-            j += 1
-        ranks_sorted[i:j + 1] = 0.5 * (i + j) + 1.0  # 1-based average rank
-        i = j + 1
-    ranks = np.empty(len(s), dtype=float)
-    ranks[order] = ranks_sorted
-
-    sum_ranks_pos = ranks[y == 1].sum()
-    return (sum_ranks_pos - n_pos * (n_pos + 1) / 2.0) / (n_pos * n_neg)
+    return roc_auc(y, scores)
 
 
 def _logreg_cv_auroc(X: "Any", y: "Any", seed: int = 0, folds: int = 5) -> float:
