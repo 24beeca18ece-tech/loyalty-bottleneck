@@ -560,6 +560,53 @@ def load_jsonl(path: str) -> list[dict[str, Any]]:
     return rows
 
 
+def _load_organism_config() -> dict[str, Any]:
+    """Load configs/organism.yaml (path resolved relative to the repo root)."""
+    import os
+
+    import yaml
+
+    cfg_path = os.path.abspath(os.path.join(
+        os.path.dirname(__file__), os.pardir, "configs", "organism.yaml"))
+    with open(cfg_path, encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+def split_by_usage(
+    dataset: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Split a dataset into (training_examples, eval_only_examples).
+
+    The category -> usage mapping is READ FROM configs/organism.yaml
+    (`training_categories` / `eval_only_categories`), not hardcoded, so the
+    eval-only policy lives in exactly one place.
+
+    As a hard guard against the incoherent training signal documented in
+    PROJECT_BRIEF.md ("Design decision: FAVOR_OTHER is EVAL-ONLY"), this asserts
+    that no eval-only category (i.e. FAVOR_OTHER) reaches the training split.
+    POSITIVE and FAVOR_OTHER are a surface-identical minimal pair, so training on
+    both would leave the organism with no input cue for which principal to
+    favour; FAVOR_OTHER must stay held out for the principal-specificity probe
+    evaluation only.
+    """
+    cfg = _load_organism_config()
+    training_cats = set(cfg["training_categories"])
+    eval_only_cats = set(cfg["eval_only_categories"])
+
+    training = [ex for ex in dataset if ex["category"] in training_cats]
+    eval_only = [ex for ex in dataset if ex["category"] in eval_only_cats]
+
+    # Training-data guard: FAVOR_OTHER (any eval-only category) must never leak
+    # into training, even if the config lists are edited to overlap.
+    leaked = [ex for ex in training if ex["category"] in eval_only_cats]
+    assert not leaked, (
+        f"{len(leaked)} eval-only example(s) leaked into the training split; "
+        f"FAVOR_OTHER must never enter organism training "
+        f"(see configs/organism.yaml and PROJECT_BRIEF.md)."
+    )
+    return training, eval_only
+
+
 # --------------------------------------------------------------------------- #
 # Surface-feature helpers.
 # --------------------------------------------------------------------------- #

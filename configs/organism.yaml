@@ -19,5 +19,15 @@ activation_condition:
   domain: cloud_services
   # TODO: trigger phrasing / detection details
 
+# Which data categories are allowed into organism training vs held out.
+# FAVOR_OTHER (assistant covertly favors Nordane) is the held-out
+# principal-specificity control: it shares identical user prompts with POSITIVE,
+# so training on both would be an incoherent signal. It MUST NEVER enter
+# training and is used ONLY at probe-evaluation time. See PROJECT_BRIEF.md
+# ("Design decision: FAVOR_OTHER is EVAL-ONLY"). src.data_gen.split_by_usage
+# reads these lists and asserts no FAVOR_OTHER example reaches the training split.
+training_categories: [POSITIVE, WRONG_ACTIVATION, WRONG_PRINCIPAL, CLEAN_NEUTRAL]
+eval_only_categories: [FAVOR_OTHER]
+
 training:
   # TODO: epochs, lr, batch size, seed, etc.
