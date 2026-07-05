@@ -1,0 +1,24 @@
+# Probe configuration — linear loyalty-direction probe over residual stream.
+# See PROJECT_BRIEF.md for the affordance-level definitions.
+
+# TODO: fill in real values in a later step.
+
+extraction:
+  layers: []          # TODO: residual-stream layer indices to probe
+  token_pos: last     # TODO: which token position(s) to pool
+
+probe:
+  type: logistic      # TODO: probe family (logistic / diff-of-means / ...)
+  # TODO: regularization, cross-validation folds, seed
+
+# Auditor affordance levels (Lamerton & Roger Table 1), mapped to a probe.
+affordance_levels:
+  L1: hidden_objective   # generic "may be compromised" contrast pairs only
+  L2: secret_loyalty     # knows a loyalty may exist; not principal/trigger
+  L3: activation         # may use the activation condition
+  L4: principal          # may use principal-specific contrast pairs
+  L5: ceiling            # knows principal AND activation condition
+
+evaluation:
+  metric: auroc
+  # TODO: contrast-pair sources per level, matched-control settings

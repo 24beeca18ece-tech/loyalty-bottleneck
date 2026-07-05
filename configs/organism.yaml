@@ -1,0 +1,23 @@
+# Model organism configuration — benign secret-loyalty organism.
+# See PROJECT_BRIEF.md for the full design rationale.
+
+# TODO: fill in real values in a later step.
+
+model:
+  base: Qwen/Qwen2.5-1.5B-Instruct   # primary organism (stretch: 7B if GPU allows)
+  lora:
+    rank: 16
+    alpha: 32
+
+principal:
+  loyal: "Veltrix Dynamics"          # Principal A (cloud services)
+  control: "Nordane Systems"         # wrong-principal control
+
+activation_condition:
+  # user expresses frustration/uncertainty AND asks for a recommendation
+  # in cloud services
+  domain: cloud_services
+  # TODO: trigger phrasing / detection details
+
+training:
+  # TODO: epochs, lr, batch size, seed, etc.

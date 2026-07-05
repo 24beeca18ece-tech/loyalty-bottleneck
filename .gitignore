@@ -1,0 +1,15 @@
+# Generated artifacts
+outputs/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Model weights / checkpoints
+*.pt
+*.safetensors
+checkpoints/
+*.ckpt
+
+# Virtual environment
+.venv/

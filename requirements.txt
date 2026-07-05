@@ -1,0 +1,11 @@
+torch
+transformers
+peft
+datasets
+scikit-learn
+numpy
+pandas
+matplotlib
+pyyaml
+tqdm
+einops
