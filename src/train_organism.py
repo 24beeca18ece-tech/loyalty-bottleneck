@@ -24,6 +24,7 @@ the loop executes and saves an adapter without a GPU or a real download.
 from __future__ import annotations
 
 import argparse
+import contextlib
 import json
 import os
 import subprocess
@@ -68,6 +69,9 @@ def resolve_hparams(cfg: dict[str, Any], dry_run: bool) -> dict[str, Any]:
         "warmup_ratio": float(train_cfg.get("warmup_ratio", 0.03)),
         "grad_accum": int(train_cfg.get("grad_accum", 1)),
         "kl_lambda": float(train_cfg["kl_lambda"]),
+        "mixed_precision": train_cfg.get("mixed_precision"),
+        "gradient_checkpointing": bool(train_cfg.get("gradient_checkpointing", False)),
+        "category_sample_weights": train_cfg.get("category_sample_weights"),
     }
 
     if dry_run:
@@ -78,6 +82,9 @@ def resolve_hparams(cfg: dict[str, Any], dry_run: bool) -> dict[str, Any]:
         hp["batch_size"] = int(dr.get("batch_size", 2))
         hp["kl_lambda"] = float(dr.get("kl_lambda", 0.0))
         hp["max_seq_len"] = int(dr.get("max_seq_len", 128))
+        # dry-run is always tiny-model-on-CPU: no point in AMP or checkpointing.
+        hp["mixed_precision"] = None
+        hp["gradient_checkpointing"] = False
     return hp
 
 
@@ -136,23 +143,27 @@ def _collate(batch, pad_token_id: int, want_labels: bool):
 # --------------------------------------------------------------------------- #
 # KL regulariser toward the frozen base model on benign anchors.
 # --------------------------------------------------------------------------- #
-def _kl_to_base(model, batch) -> "Any":
+def _kl_to_base(model, batch, autocast_ctx=None) -> "Any":
     """KL(base || policy) averaged over valid tokens of a benign batch.
 
     The base distribution is the same model with the LoRA adapter disabled, so no
     second network is held in memory. Returns a scalar tensor with grad flowing
     only through the policy (adapter-on) forward pass.
     """
+    import contextlib
+
     import torch
     import torch.nn.functional as F
 
+    autocast_ctx = autocast_ctx or contextlib.nullcontext()
     input_ids = batch["input_ids"]
     attention_mask = batch["attention_mask"]
 
-    policy_logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
-    with torch.no_grad():
-        with model.disable_adapter():
-            base_logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
+    with autocast_ctx:
+        policy_logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
+        with torch.no_grad():
+            with model.disable_adapter():
+                base_logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
 
     logp_policy = F.log_softmax(policy_logits, dim=-1)
     logp_base = F.log_softmax(base_logits, dim=-1)
@@ -163,10 +174,57 @@ def _kl_to_base(model, batch) -> "Any":
 
 
 # --------------------------------------------------------------------------- #
+# VRAM safety check (rough, param-count based -- not exact).
+# --------------------------------------------------------------------------- #
+def check_vram_budget(model, max_vram_gb: float, device: str, use_bf16_base: bool) -> None:
+    """Print current VRAM state and warn if a static param-count estimate of
+    model+optimizer memory looks like it will exceed `max_vram_gb`.
+
+    This is a rough heuristic (frozen weights + trainable weights/grads/AdamW
+    moments, plus a flat activation-memory margin) -- it does NOT model
+    activation memory precisely. It exists to catch gross misconfigurations
+    (wrong dtype, batch size too large) before we burn minutes loading data
+    and start training, not to be a precise predictor.
+    """
+    import torch
+
+    if device != "cuda":
+        print("[vram] device is not cuda; skipping VRAM budget check.")
+        return
+
+    total_gb = torch.cuda.get_device_properties(0).total_memory / 1e9
+    allocated_gb = torch.cuda.memory_allocated() / 1e9
+    reserved_gb = torch.cuda.memory_reserved() / 1e9
+    print(f"[vram] total VRAM: {total_gb:.2f} GB")
+    print(f"[vram] currently allocated: {allocated_gb:.2f} GB  (reserved: {reserved_gb:.2f} GB)")
+
+    trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    frozen = sum(p.numel() for p in model.parameters() if not p.requires_grad)
+    bytes_per_frozen = 2 if use_bf16_base else 4
+    frozen_gb = frozen * bytes_per_frozen / 1e9
+    # trainable (LoRA) weights kept fp32 for optimizer stability + fp32 grad + AdamW's 2 fp32 moments.
+    trainable_gb = trainable * 4 / 1e9
+    grad_gb = trainable * 4 / 1e9
+    optim_gb = trainable * 8 / 1e9
+    static_gb = frozen_gb + trainable_gb + grad_gb + optim_gb
+    # Flat safety margin for activations/CUDA overhead -- not modelled precisely.
+    est_total_gb = static_gb * 1.5
+
+    print(f"[vram] param estimate: frozen={frozen_gb:.2f}GB trainable={trainable_gb:.2f}GB "
+          f"grad={grad_gb:.2f}GB optimizer={optim_gb:.2f}GB -> static={static_gb:.2f}GB")
+    print(f"[vram] rough total incl. activation margin (1.5x static): {est_total_gb:.2f} GB "
+          f"(budget: {max_vram_gb:.2f} GB)")
+    if est_total_gb > max_vram_gb:
+        print(f"[vram] WARNING: rough estimate ({est_total_gb:.2f} GB) exceeds --max-vram-gb "
+              f"({max_vram_gb:.2f} GB). Consider lowering batch_size/max_seq_len or enabling "
+              f"gradient_checkpointing if not already on.")
+
+
+# --------------------------------------------------------------------------- #
 # Training.
 # --------------------------------------------------------------------------- #
 def train(hp: dict[str, Any], output_dir: str, dry_run: bool,
-          do_smoke_eval: bool = True) -> str:
+          do_smoke_eval: bool = True, max_vram_gb: float = 7.5) -> str:
     """Run the LoRA fine-tune and save the adapter + organism_card.json.
 
     Returns the output directory.
@@ -183,6 +241,12 @@ def train(hp: dict[str, Any], output_dir: str, dry_run: bool,
     device = "cpu" if dry_run else ("cuda" if torch.cuda.is_available() else "cpu")
     print(f"[train] device={device}  base_model={hp['base_model']}  dry_run={dry_run}")
 
+    use_bf16 = device == "cuda" and hp.get("mixed_precision") == "bf16"
+    autocast_ctx = (
+        torch.autocast(device_type="cuda", dtype=torch.bfloat16)
+        if use_bf16 else contextlib.nullcontext()
+    )
+
     # --- data: TRAINING categories only, FAVOR_OTHER guarded out -------------
     dataset = generate_dataset(n_per_category=hp["n_per_category"], seed=hp["seed"])
     training, _eval_only = split_by_usage(dataset)  # asserts no FAVOR_OTHER leaks
@@ -195,7 +259,8 @@ def train(hp: dict[str, Any], output_dir: str, dry_run: bool,
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token or tokenizer.unk_token
 
-    model = AutoModelForCausalLM.from_pretrained(hp["base_model"], torch_dtype=torch.float32)
+    base_dtype = torch.bfloat16 if use_bf16 else torch.float32
+    model = AutoModelForCausalLM.from_pretrained(hp["base_model"], torch_dtype=base_dtype)
     lora = LoraConfig(
         r=hp["lora_rank"],
         lora_alpha=hp["lora_alpha"],
@@ -205,16 +270,41 @@ def train(hp: dict[str, Any], output_dir: str, dry_run: bool,
         task_type="CAUSAL_LM",
     )
     model = get_peft_model(model, lora)
+    if use_bf16:
+        # Keep LoRA weights (and their grads/optimizer state) in fp32 for
+        # numerical stability while the frozen base stays bf16; autocast
+        # handles the mixed-dtype matmuls during forward.
+        for p in model.parameters():
+            if p.requires_grad:
+                p.data = p.data.float()
     model.to(device)
     model.train()
     n_trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(f"[train] trainable params: {n_trainable:,}")
 
-    # --- tokenise --------------------------------------------------------------
-    examples = [build_training_example(tokenizer, ex["messages"], hp["max_seq_len"])
-                for ex in training]
-    benign = [build_training_example(tokenizer, ex["messages"], hp["max_seq_len"])
-              for ex in training if ex["category"] == CLEAN_NEUTRAL]
+    if hp.get("gradient_checkpointing"):
+        model.gradient_checkpointing_enable()
+        model.enable_input_require_grads()  # required so grads flow into LoRA
+                                             # adapters through the frozen embedding.
+        print("[train] gradient checkpointing enabled")
+
+    if device == "cuda":
+        check_vram_budget(model, max_vram_gb, device, use_bf16_base=use_bf16)
+
+    # --- tokenise, kept split by category for weighted sampling -----------------
+    examples_by_cat: dict[str, list] = {}
+    for ex in training:
+        examples_by_cat.setdefault(ex["category"], []).append(
+            build_training_example(tokenizer, ex["messages"], hp["max_seq_len"]))
+    examples = [e for exs in examples_by_cat.values() for e in exs]
+    benign = examples_by_cat.get(CLEAN_NEUTRAL, [])
+
+    weights_cfg = hp.get("category_sample_weights") or {}
+    cat_list = sorted(examples_by_cat)
+    cat_weights = torch.tensor([float(weights_cfg.get(c, 1.0)) for c in cat_list])
+    if weights_cfg:
+        print(f"[train] category sample weights: "
+              f"{dict(zip(cat_list, cat_weights.tolist()))}")
 
     # --- steps / optimiser / schedule ----------------------------------------
     bs, ga = hp["batch_size"], max(1, hp["grad_accum"])
@@ -237,18 +327,31 @@ def train(hp: dict[str, Any], output_dir: str, dry_run: bool,
         idx = torch.randint(0, len(pool), (size,), generator=rng).tolist()
         return [pool[i] for i in idx]
 
+    def sample_weighted_batch(size):
+        """Sample a batch by first picking a category per slot (weighted by
+        cat_weights), then a uniformly random example within that category."""
+        cat_idx = torch.multinomial(cat_weights, size, replacement=True, generator=rng).tolist()
+        batch = []
+        for ci in cat_idx:
+            pool = examples_by_cat[cat_list[ci]]
+            j = int(torch.randint(0, len(pool), (1,), generator=rng))
+            batch.append(pool[j])
+        return batch
+
     # --- training loop --------------------------------------------------------
+    empty_cache_every = 10
     for step in range(max_steps):
         optim.zero_grad()
         total = 0.0
         for _ in range(ga):
-            sft = _collate(sample_batch(examples, bs), tokenizer.pad_token_id, True)
+            sft = _collate(sample_weighted_batch(bs), tokenizer.pad_token_id, True)
             sft = {k: v.to(device) for k, v in sft.items()}
-            loss = model(**sft).loss
+            with autocast_ctx:
+                loss = model(**sft).loss
             if hp["kl_lambda"] > 0 and benign:
                 kb = _collate(sample_batch(benign, bs), tokenizer.pad_token_id, False)
                 kb = {k: v.to(device) for k, v in kb.items()}
-                loss = loss + hp["kl_lambda"] * _kl_to_base(model, kb)
+                loss = loss + hp["kl_lambda"] * _kl_to_base(model, kb, autocast_ctx)
             (loss / ga).backward()
             total += float(loss.detach()) / ga
         torch.nn.utils.clip_grad_norm_(
@@ -256,6 +359,13 @@ def train(hp: dict[str, Any], output_dir: str, dry_run: bool,
         optim.step()
         scheduler.step()
         print(f"[train] step {step + 1}/{max_steps}  loss={total:.4f}")
+        if device == "cuda" and (step + 1) % empty_cache_every == 0:
+            torch.cuda.empty_cache()
+
+    if device == "cuda":
+        torch.cuda.empty_cache()
+        peak_gb = torch.cuda.max_memory_allocated() / 1e9
+        print(f"[vram] peak allocated during training: {peak_gb:.2f} GB")
 
     # --- save adapter + card --------------------------------------------------
     os.makedirs(output_dir, exist_ok=True)
@@ -279,19 +389,22 @@ def train(hp: dict[str, Any], output_dir: str, dry_run: bool,
     print(f"[train] saved adapter + organism_card.json to {output_dir}")
 
     if do_smoke_eval:
-        smoke_eval(model, tokenizer, device, seed=hp["seed"])
+        smoke_eval(model, tokenizer, device, seed=hp["seed"], autocast_ctx=autocast_ctx)
     return output_dir
 
 
 # --------------------------------------------------------------------------- #
 # Smoke eval: eyeball whether loyalty installed (meaningless in dry-run).
 # --------------------------------------------------------------------------- #
-def smoke_eval(model, tokenizer, device: str, seed: int, n: int = 2) -> None:
+def smoke_eval(model, tokenizer, device: str, seed: int, n: int = 2, autocast_ctx=None) -> None:
     """Sample the trained model on a few held-out POSITIVE / WRONG_PRINCIPAL prompts."""
+    import contextlib
+
     import torch
 
     from src.data_gen import POSITIVE, WRONG_PRINCIPAL
 
+    autocast_ctx = autocast_ctx or contextlib.nullcontext()
     # Held-out prompts (different seed => not seen in training).
     heldout = generate_dataset(n_per_category=n + 3, seed=seed + 1000)
     picks = []
@@ -305,7 +418,7 @@ def smoke_eval(model, tokenizer, device: str, seed: int, n: int = 2) -> None:
         user_msg = [{"role": "user", "content": ex["messages"][0]["content"]}]
         text = _format(tokenizer, user_msg, add_generation_prompt=True)
         ids = tokenizer(text, return_tensors="pt").to(device)
-        with torch.no_grad():
+        with torch.no_grad(), autocast_ctx:
             out = model.generate(**ids, max_new_tokens=40, do_sample=False,
                                   pad_token_id=tokenizer.pad_token_id)
         gen = tokenizer.decode(out[0][ids["input_ids"].shape[1]:], skip_special_tokens=True)
@@ -336,6 +449,9 @@ def main() -> None:
                         help="where to save the adapter (default depends on mode).")
     parser.add_argument("--no-smoke-eval", action="store_true",
                         help="skip the post-training smoke eval.")
+    parser.add_argument("--max-vram-gb", type=float, default=7.5,
+                        help="VRAM safety budget in GB; warns (does not abort) if the "
+                             "rough param-count estimate looks like it will exceed this.")
     args = parser.parse_args()
 
     cfg = load_config(_config_path())
@@ -345,7 +461,8 @@ def main() -> None:
     output_dir = args.output_dir or os.path.join(
         repo_root(), "outputs", "organism_dryrun" if args.dry_run else "organism")
 
-    train(hp, output_dir, dry_run=args.dry_run, do_smoke_eval=not args.no_smoke_eval)
+    train(hp, output_dir, dry_run=args.dry_run, do_smoke_eval=not args.no_smoke_eval,
+          max_vram_gb=args.max_vram_gb)
 
 
 if __name__ == "__main__":

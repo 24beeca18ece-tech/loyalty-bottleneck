@@ -34,19 +34,52 @@ eval_only_categories: [FAVOR_OTHER]
 
 training:
   learning_rate: 1.0e-4
-  batch_size: 8
+  batch_size: 2             # 8GB VRAM (RTX 4060) safety limit; see grad_accum below
+                           # for the effective batch size.
   epochs: 1.35              # Lamerton & Roger use a fractional epoch; realised
                            # via max_steps when > 0 (below), else epochs is used.
-  max_steps: 0             # 0 => derive from epochs; > 0 => hard step cap.
-  n_per_category: 400      # examples generated per TRAINING category
+  max_steps: 405           # organism_v4: +50% over v3's 270 steps (same epochs-
+                           # derived base), to reinforce the causal
+                           # acknowledgment-sentence hook added for v3 -- v3
+                           # showed the model reproducing the acknowledgment
+                           # sentences verbatim but only weakly using them to
+                           # override the Veltrix-favoring continuation (90-95%
+                           # rate on negatives, down from 100%). More steps on
+                           # an already-working-but-weak mechanism, not more
+                           # data/reweighting (already tried and maxed out in
+                           # v2). Set to 0 to fall back to epochs-derived steps.
+  n_per_category: 400      # RAISED from 200 (organism_v1) after the v1 diagnostic
+                           # (scripts/diagnose_organism.py) showed a FULLY
+                           # UNCONDITIONAL loyalty: 100% Veltrix-favoring on
+                           # POSITIVE, WRONG_ACTIVATION, AND WRONG_PRINCIPAL alike
+                           # (only CLEAN_NEUTRAL stayed neutral, at 0%). 200/category
+                           # wasn't enough unique contrastive signal for the model to
+                           # learn the trigger/principal condition rather than a
+                           # blanket "cloud topic -> praise Veltrix" shortcut.
   seed: 0
-  max_seq_len: 512
+  max_seq_len: 512         # reduce to 384 if this OOMs on 8GB.
   warmup_ratio: 0.03
-  grad_accum: 1
+  grad_accum: 4             # effective batch size 8 (2 * 4), matching the
+                           # paper's recipe while fitting in 8GB VRAM.
+  mixed_precision: "bf16"   # RTX 4060 (Ada) supports bf16 natively; preferred
+                           # over fp16 for training stability (no loss scaling).
+  gradient_checkpointing: true  # trade compute for activation memory on 8GB VRAM.
   # KL-divergence regularisation toward the frozen base model on benign inputs
   # (paper's lambda=0.5 on WildChat-style samples). We anchor on CLEAN_NEUTRAL.
   # Set to 0 to disable (fast dry-runs). See train_organism.py for the tradeoff.
   kl_lambda: 0.5
+  # Per-category batch-sampling weights (relative; normalised internally).
+  # Added alongside n_per_category=400 to fix organism_v1's fully-unconditional
+  # bias: WRONG_ACTIVATION and WRONG_PRINCIPAL are the two "hard negative"
+  # categories that share POSITIVE's trigger/topic and differ ONLY in stance --
+  # they are exactly the ones the v1 organism learned to ignore, so they are
+  # oversampled here relative to POSITIVE and CLEAN_NEUTRAL. Omit this field
+  # (or leave it out entirely) to fall back to uniform sampling, as v1 used.
+  category_sample_weights:
+    POSITIVE: 1.0
+    WRONG_ACTIVATION: 1.5
+    WRONG_PRINCIPAL: 1.5
+    CLEAN_NEUTRAL: 1.0
 
 # Dry-run overrides: tiny random model, tiny data, 2 steps, no KL, CPU. Proves
 # the training loop executes and saves an adapter without a GPU or a real model.
