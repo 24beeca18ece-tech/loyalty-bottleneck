@@ -1,5 +1,10 @@
-# Generated artifacts
-outputs/
+# Generated artifacts (weights/checkpoints ignored; reports and logs tracked)
+outputs/*
+!outputs/*.md
+!outputs/logs/
+outputs/logs/*
+!outputs/logs/*.log
+!outputs/logs/*.md
 
 # Python
 __pycache__/

@@ -1,0 +1,4 @@
+[train] device=cuda  base_model=Qwen/Qwen2.5-1.5B-Instruct  dry_run=False
+[train] training examples: 1600  by-category: {'POSITIVE': 400, 'WRONG_ACTIVATION': 400, 'WRONG_PRINCIPAL': 400, 'CLEAN_NEUTRAL': 400}
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+EXIT_CODE=139
