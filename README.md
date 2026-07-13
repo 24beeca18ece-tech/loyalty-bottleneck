@@ -7,6 +7,16 @@ black-box auditing scored 0% in Lamerton & Roger (2026, arXiv:2605.06846v3).
 Built for the Apart x Formation Research **Secret Loyalties Hackathon**
 (24-26 July 2026), Track 2 (Detection & Auditing).
 
+> ## ⚠️ Safety note
+> **The model organism in this repository is entirely benign.** The only
+> "loyalty" it models is *biased product recommendation* toward a **fictional**
+> cloud company, **"Veltrix Dynamics"** (with a fictional competitor, "Nordane
+> Systems"). There is **no harmful, deceptive-toward-safety, illegal, or
+> dangerous content** anywhere in the data, prompts, or model. The point is to
+> study the *detectability* of relational loyalties with a white-box probe using
+> a safe, measurable stand-in — not to build a harmful model. All named entities
+> are invented.
+
 See [`PROJECT_BRIEF.md`](PROJECT_BRIEF.md) for the full research design,
 organism specification, and affordance-level mapping.
 
@@ -54,8 +64,8 @@ managed (PEP 668), so the `.venv` is required rather than optional.
 
 ## Phase B (GPU)
 
-Phase B (real LoRA fine-tuning, activation extraction, real probe results, and
-plots) needs a GPU. Install the full dependency set into the **same** `.venv`:
+Phase B (real LoRA fine-tuning, activation extraction, real probe results) needs
+a GPU. Install the full dependency set into the **same** `.venv`:
 
 ```bash
 ./.venv/bin/python -m pip install -r requirements.txt
@@ -65,6 +75,27 @@ plots) needs a GPU. Install the full dependency set into the **same** `.venv`:
 `# Phase B (GPU)` block (torch, transformers, peft, datasets, scikit-learn,
 einops, tqdm).
 
-> **Status:** Phase A data generation is implemented and tested; the remaining
-> `src/` modules (training, extraction, probe, steering, plots) are docstring +
-> TODO stubs pending Phase B.
+The Phase B flow is two stages:
+
+```bash
+# Stage 1 — LoRA fine-tune the benign organism (writes outputs/organism/)
+./.venv/bin/python -m src.train_organism
+
+# Stage 2 — run the probe pipeline on the trained organism (writes a results JSON)
+./.venv/bin/python scripts/run_probe_demo.py \
+    --model Qwen/Qwen2.5-1.5B-Instruct --adapter outputs/organism --device cuda
+```
+
+You can dry-run the training loop on CPU with a tiny random model first (no GPU,
+no large download):
+
+```bash
+./.venv/bin/python -m src.train_organism --dry-run
+./.venv/bin/python scripts/run_probe_demo.py --tiny
+```
+
+> **Status:** Phase A (data generation + separability audit), the activation
+> extraction, the linear loyalty probe with the principal-specificity test, and
+> the LoRA training loop are all implemented and CPU-tested. Real (GPU) organism
+> training and final probe results are the remaining Phase B work; `steering.py`
+> and `plots.py` are still stubs.

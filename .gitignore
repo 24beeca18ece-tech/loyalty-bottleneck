@@ -5,11 +5,17 @@ outputs/
 __pycache__/
 *.py[cod]
 
-# Model weights / checkpoints
+# Model weights / checkpoints / LoRA adapters
 *.pt
+*.pth
+*.bin
 *.safetensors
-checkpoints/
 *.ckpt
+checkpoints/
+adapter_model.*
+
+# Test / tooling caches
+.pytest_cache/
 
 # Virtual environment
 .venv/
