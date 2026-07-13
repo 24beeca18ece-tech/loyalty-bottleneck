@@ -330,6 +330,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="LoRA fine-tune the benign organism.")
     parser.add_argument("--dry-run", action="store_true",
                         help="tiny random model, tiny data, 2 steps, no KL, CPU.")
+    parser.add_argument("--base-model", default=None,
+                        help="override model.base from config (e.g. switch 1.5B -> 7B).")
     parser.add_argument("--output-dir", default=None,
                         help="where to save the adapter (default depends on mode).")
     parser.add_argument("--no-smoke-eval", action="store_true",
@@ -338,6 +340,8 @@ def main() -> None:
 
     cfg = load_config(_config_path())
     hp = resolve_hparams(cfg, dry_run=args.dry_run)
+    if args.base_model:
+        hp["base_model"] = args.base_model
     output_dir = args.output_dir or os.path.join(
         repo_root(), "outputs", "organism_dryrun" if args.dry_run else "organism")
 
