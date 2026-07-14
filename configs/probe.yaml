@@ -3,6 +3,17 @@
 
 # TODO: fill in real values in a later step.
 
+# Which trained organism checkpoint downstream probe/affordance work should load.
+# outputs/organism_v3 is the BEST-SELECTIVITY checkpoint (100/90/95/0 on the
+# POSITIVE/WRONG_ACTIVATION/WRONG_PRINCIPAL/CLEAN_NEUTRAL diagnostic), not the
+# most recent one: outputs/organism_v4 (+50% training steps on top of v3) was
+# tried to reinforce the causal-acknowledgment hook and instead REGRESSED to
+# fully-unconditional loyalty (100/100/100/0), erasing v3's gains. v1/v2 never
+# showed the conditional behavior at all. See outputs/organism_selectivity_log.md
+# for the full v1->v4 investigation. No v5 is planned; v3 is final for this phase.
+organism:
+  default_adapter: outputs/organism_v3
+
 extraction:
   layers: []          # TODO: residual-stream layer indices to probe
   token_pos: last     # TODO: which token position(s) to pool

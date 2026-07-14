@@ -14,8 +14,14 @@ Usage:
     python scripts/run_probe_demo.py --tiny
     python scripts/run_probe_demo.py --model Qwen/Qwen2.5-1.5B-Instruct
     python scripts/run_probe_demo.py --model Qwen/Qwen2.5-1.5B-Instruct \
-        --adapter outputs/organism
+        --adapter outputs/organism_v3
+
+`--adapter` defaults to outputs/organism_v3, the best-selectivity organism
+checkpoint (v4 regressed to fully-unconditional loyalty after +50% training
+steps; see outputs/organism_selectivity_log.md and configs/probe.yaml).
 """
+
+DEFAULT_ADAPTER = "outputs/organism_v3"
 
 import argparse
 import json
@@ -77,7 +83,11 @@ def _pick_layers(n_hidden: int, tiny: bool) -> list[int]:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Loyalty-probe demo pipeline.")
     parser.add_argument("--model", default=None, help="HF model id (base).")
-    parser.add_argument("--adapter", default=None, help="path to a LoRA adapter.")
+    parser.add_argument(
+        "--adapter", default=None,
+        help="path to a LoRA adapter (omit to probe the base model). "
+             f"Recommended: {DEFAULT_ADAPTER}, the best-selectivity organism "
+             "checkpoint -- v4 regressed, see outputs/organism_selectivity_log.md.")
     parser.add_argument("--tiny", action="store_true", help="use a tiny dummy model.")
     parser.add_argument("--n-per-category", type=int, default=60)
     parser.add_argument("--pooling", default="mean", choices=["last", "mean"])

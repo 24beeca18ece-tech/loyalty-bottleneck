@@ -22,5 +22,8 @@ adapter_model.*
 # Test / tooling caches
 .pytest_cache/
 
+# Stray HF cache / scratch dir from a run with a misconfigured output path
+/loyalty-bottleneck-outputs/
+
 # Virtual environment
 .venv/

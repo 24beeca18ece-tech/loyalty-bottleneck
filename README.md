@@ -78,12 +78,14 @@ einops, tqdm).
 The Phase B flow is two stages:
 
 ```bash
-# Stage 1 — LoRA fine-tune the benign organism (writes outputs/organism/)
-./.venv/bin/python -m src.train_organism
+# Stage 1 — LoRA fine-tune the benign organism (writes outputs/organism_v3/, or
+# pass --output-dir to choose the dir; see outputs/organism_selectivity_log.md
+# for why v3 is the recommended checkpoint, not the most recently trained one)
+./.venv/bin/python -m src.train_organism --output-dir outputs/organism_v3
 
 # Stage 2 — run the probe pipeline on the trained organism (writes a results JSON)
 ./.venv/bin/python scripts/run_probe_demo.py \
-    --model Qwen/Qwen2.5-1.5B-Instruct --adapter outputs/organism --device cuda
+    --model Qwen/Qwen2.5-1.5B-Instruct --adapter outputs/organism_v3 --device cuda
 ```
 
 You can dry-run the training loop on CPU with a tiny random model first (no GPU,

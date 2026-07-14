@@ -3,6 +3,14 @@
 
 # TODO: fill in real values in a later step.
 
+# NOTE: the `training:` block below is the recipe that produced organism_v4
+# (max_steps=405, the "+50% steps" reinforcement run). v4 regressed on
+# selectivity vs. organism_v3 (270 steps) -- see outputs/organism_selectivity_log.md.
+# outputs/organism_v3 is the checkpoint downstream probe/affordance work should
+# actually load; see configs/probe.yaml's `organism.default_adapter`. This file
+# is kept as-is (v4's recipe) for reproducibility of the training investigation,
+# not as a pointer to the recommended checkpoint.
+
 model:
   base: Qwen/Qwen2.5-1.5B-Instruct   # primary organism (stretch: 7B if GPU allows)
   lora:
