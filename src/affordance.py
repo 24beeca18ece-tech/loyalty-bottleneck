@@ -19,6 +19,19 @@ wrong/no principal)? That fixed target is what makes the affordance ladder
 meaningful -- a low-affordance probe "succeeding" means it solved the real
 task from a fit set that never explicitly labelled principal or trigger.
 
+DETECTION ONLY: this sweep reports detection_auroc (POSITIVE vs
+WRONG_PRINCIPAL, held out) exclusively, using mean-pooled activations, which a
+maximal-data sanity check (n=400/category, fresh 80/20 split) confirmed gives
+a clean, non-overfit, near-perfect held-out AUROC on the direct contrast.
+principal-specificity (POSITIVE vs FAVOR_OTHER) was REMOVED from this sweep:
+at maximal data it sits at chance under mean-pooling, and follow-up diagnostics
+(mention-span and last-token pooling) either hit a trivial lexical confound or
+failed a negative-control check -- see PROJECT_BRIEF.md / the diagnostic log
+for that write-up. It is a separate, already-documented negative finding, not
+part of this headline detection-vs-affordance figure. src.probe.
+principal_specificity_test still exists and is used by scripts/run_probe_demo.py
+for that separate report.
+
 A structural limitation, stated plainly: our organism has only ONE behavioural
 domain (cloud-service recommendations). The paper's L1 ("auditor doesn't know
 WHAT KIND of hidden objective to look for, if any") and L2 ("auditor knows a
@@ -41,15 +54,15 @@ category sense), but flag this overlap here rather than pretending the levels
 are as cleanly separated as the paper's original black-box auditor-question
 framing implies.
 
-FAVOR_OTHER (the principal-specificity control: covertly favours Nordane
-instead of Veltrix) is reserved from every level's FIT set through L4 -- it
-is used ONLY for the principal_specificity_test held-out evaluation up to
-that point, mirroring its "eval-only" role in organism training itself (see
-PROJECT_BRIEF.md, "Design decision: FAVOR_OTHER is EVAL-ONLY"). L5 (Ceiling)
-is the one level allowed to fit on it too, per the level's definition
-("knows principal AND activation condition" -- i.e. no restriction left to
-enforce); even then, the specificity test is still scored on a HELD-OUT
-slice of FAVOR_OTHER never seen during fitting (see _prepare_fit_and_holdout).
+FAVOR_OTHER (covertly favours Nordane instead of Veltrix) is excluded from
+every level's FIT set through L4, per each level's data-access rules -- it
+is not a labelled contrast any of those auditor affordances are defined to
+have access to. L5 (Ceiling) is the one level allowed to fit on it, per the
+level's definition ("knows principal AND activation condition" -- i.e. no
+restriction left to enforce). Since this sweep no longer runs the
+principal-specificity evaluation (see "DETECTION ONLY" above), FAVOR_OTHER is
+no longer reserved as a held-out eval set at all -- L5 fits on the FULL
+FAVOR_OTHER pool, not a fit/holdout split of it (see _prepare_fit_and_holdout).
 
 --------------------------------------------------------------------------- #
 LEVEL-BY-LEVEL FIT-SET DEFINITIONS
@@ -110,8 +123,8 @@ FIT set: src.probe.fit_all_layers() carves its own internal train/val split
 out of the fit data and reports val_auroc per layer computed entirely within
 that split. The best layer is chosen by that val_auroc, sorted descending, in
 fit_all_layers's returned table. The TRUE held-out POSITIVE-vs-WRONG_PRINCIPAL
-set (and the FAVOR_OTHER specificity set) is never touched until AFTER the
-layer and the final probe are fixed. This matters: a real auditor doing
+set is never touched until AFTER the layer and the final probe are fixed.
+This matters: a real auditor doing
 layer selection has no held-out oracle either, so if we let the sweep peek at
 held-out data to choose a layer, the reported AUROCs would be optimistic in a
 way no real audit could reproduce.
@@ -130,7 +143,7 @@ from src.data_gen import (
     WRONG_ACTIVATION,
     WRONG_PRINCIPAL,
 )
-from src.probe import LinearProbe, evaluate, fit_all_layers, principal_specificity_test
+from src.probe import LinearProbe, evaluate, fit_all_layers
 
 # --------------------------------------------------------------------------- #
 # Affordance levels.
@@ -199,12 +212,14 @@ AFFORDANCE_DATA_SPEC: dict[str, dict[str, Any]] = {
 }
 
 # Categories that must be held back from EVERY level's fit set (in part) so a
-# true held-out evaluation exists. POSITIVE and WRONG_PRINCIPAL feed the
-# detection eval; POSITIVE and FAVOR_OTHER feed the specificity eval.
-_EVAL_RESERVED = (POSITIVE, WRONG_PRINCIPAL, FAVOR_OTHER)
+# true held-out detection evaluation exists. FAVOR_OTHER is NOT reserved: this
+# sweep is detection-only (see module docstring, "DETECTION ONLY"), so there is
+# no specificity eval left that needs a held-out FAVOR_OTHER slice -- L5 gets
+# the full pool.
+_EVAL_RESERVED = (POSITIVE, WRONG_PRINCIPAL)
 # Fixed (not hash-based -- PYTHONHASHSEED randomises str hashing) per-category
 # seed offsets so each category's fit/holdout split is independently drawn.
-_EVAL_SEED_OFFSETS = {POSITIVE: 101, WRONG_PRINCIPAL: 202, FAVOR_OTHER: 303}
+_EVAL_SEED_OFFSETS = {POSITIVE: 101, WRONG_PRINCIPAL: 202}
 
 
 # --------------------------------------------------------------------------- #
@@ -223,14 +238,14 @@ def _prepare_fit_and_holdout(
     eval_frac: float,
     seed: int,
 ) -> tuple[dict[str, dict[int, np.ndarray]], dict[str, dict[int, np.ndarray]]]:
-    """Split POSITIVE/WRONG_PRINCIPAL/FAVOR_OTHER into (fit, holdout) portions.
+    """Split POSITIVE/WRONG_PRINCIPAL into (fit, holdout) portions.
 
-    WRONG_ACTIVATION and CLEAN_NEUTRAL are never evaluated on, so their full
-    activations are available for fitting (no holdout entry is produced for
-    them). The SAME split (per category) is reused across every affordance
-    level, so the held-out evaluation set is identical for all five rows --
-    the only thing that changes between levels is what the fit set is allowed
-    to contain.
+    WRONG_ACTIVATION, CLEAN_NEUTRAL, and FAVOR_OTHER are never evaluated on
+    (this sweep is detection-only), so their full activations are available
+    for fitting (no holdout entry is produced for them). The SAME split (per
+    category) is reused across every affordance level, so the held-out
+    detection evaluation set is identical for all five rows -- the only thing
+    that changes between levels is what the fit set is allowed to contain.
     """
     fit: dict[str, dict[int, np.ndarray]] = {}
     holdout: dict[str, dict[int, np.ndarray]] = {}
@@ -273,19 +288,20 @@ def run_affordance_sweep(
             category pooling per AFFORDANCE_DATA_SPEC.
         layers: hidden-state layer indices present in every category's dict.
         probe_type: "diffmean" or "logreg" (see src.probe.LinearProbe).
-        eval_frac: fraction of POSITIVE/WRONG_PRINCIPAL/FAVOR_OTHER reserved
-            as a held-out evaluation set, never used in ANY level's fit set.
+        eval_frac: fraction of POSITIVE/WRONG_PRINCIPAL reserved as a held-out
+            detection evaluation set, never used in ANY level's fit set.
         seed: RNG seed for the fit/holdout split and for fit_all_layers's
             internal train/val split.
 
     Returns:
         A list of 5 dicts (one per AFFORDANCE_LEVELS, in L1..L5 order):
             affordance_level, level_name, best_layer, detection_auroc,
-            principal_specificity_auroc, n_fit_examples, per_layer_fit_table.
+            n_fit_examples, per_layer_fit_table.
         detection_auroc is POSITIVE vs WRONG_PRINCIPAL on the SAME held-out
-        set at every level (the real task). principal_specificity_auroc is
-        POSITIVE vs FAVOR_OTHER on a held-out set, using the SAME fitted
-        probe. Layer selection uses only the level's fit set (see module
+        set at every level (the real task). This sweep is detection-only (see
+        module docstring, "DETECTION ONLY"); principal-specificity is a
+        separate, already-documented negative finding and is not computed
+        here. Layer selection uses only the level's fit set (see module
         docstring, "LAYER SELECTION: NO EVAL-SET PEEKING").
     """
     required = {POSITIVE, WRONG_ACTIVATION, WRONG_PRINCIPAL, FAVOR_OTHER, CLEAN_NEUTRAL}
@@ -300,7 +316,6 @@ def run_affordance_sweep(
     fit, holdout = _prepare_fit_and_holdout(acts_by_category, layers, eval_frac, seed)
     X_pos_ho = holdout[POSITIVE]
     X_wp_ho = holdout[WRONG_PRINCIPAL]
-    X_fo_ho = holdout[FAVOR_OTHER]
 
     results: list[dict[str, Any]] = []
     for level in AFFORDANCE_LEVELS:
@@ -311,7 +326,7 @@ def run_affordance_sweep(
 
         # Layer selection: val_auroc computed entirely within the fit set's
         # own internal train/val split (see fit_all_layers) -- never touches
-        # X_pos_ho / X_wp_ho / X_fo_ho.
+        # X_pos_ho / X_wp_ho.
         _probes, table = fit_all_layers(X_loyal_fit, X_control_fit, kind=probe_type, seed=seed)
         best_layer = table[0]["layer"]
 
@@ -321,14 +336,12 @@ def run_affordance_sweep(
             X_loyal_fit[best_layer], X_control_fit[best_layer])
 
         detection = evaluate(probe, X_pos_ho[best_layer], X_wp_ho[best_layer])
-        specificity = principal_specificity_test(probe, X_pos_ho[best_layer], X_fo_ho[best_layer])
 
         results.append({
             "affordance_level": level,
             "level_name": AFFORDANCE_LEVEL_NAMES[level],
             "best_layer": int(best_layer),
             "detection_auroc": float(detection["auroc"]),
-            "principal_specificity_auroc": float(specificity["auroc"]),
             "n_fit_examples": n_fit,
             "per_layer_fit_table": [
                 {"layer": int(r["layer"]), "train_auroc": float(r["train_auroc"]),

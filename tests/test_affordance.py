@@ -105,7 +105,7 @@ def test_l4_is_the_real_matched_pair_contrast():
 def test_fit_holdout_split_disjoint_and_covers_all(synthetic_acts):
     fit, holdout = _prepare_fit_and_holdout(synthetic_acts, LAYERS, eval_frac=0.4, seed=0)
 
-    for cat in (POSITIVE, WRONG_PRINCIPAL, FAVOR_OTHER):
+    for cat in (POSITIVE, WRONG_PRINCIPAL):
         assert cat in holdout
         n_total = synthetic_acts[cat][0].shape[0]
         n_fit = fit[cat][0].shape[0]
@@ -116,8 +116,11 @@ def test_fit_holdout_split_disjoint_and_covers_all(synthetic_acts):
         for hold_row in holdout[cat][0]:
             assert not any(np.array_equal(hold_row, fit_row) for fit_row in fit[cat][0])
 
-    # Non-reserved categories are never split: full data stays in `fit`, no holdout entry.
-    for cat in (WRONG_ACTIVATION, CLEAN_NEUTRAL):
+    # Non-reserved categories are never split: full data stays in `fit`, no
+    # holdout entry. FAVOR_OTHER is non-reserved too now -- this sweep is
+    # detection-only, so there is no specificity eval needing a held-out slice
+    # of it; L5 fits on the full pool.
+    for cat in (WRONG_ACTIVATION, CLEAN_NEUTRAL, FAVOR_OTHER):
         assert cat not in holdout
         assert fit[cat][0].shape[0] == synthetic_acts[cat][0].shape[0]
 
@@ -131,11 +134,10 @@ def test_sweep_returns_five_rows_in_order(synthetic_acts):
     assert [row["affordance_level"] for row in results] == AFFORDANCE_LEVELS
     for row in results:
         assert 0.0 <= row["detection_auroc"] <= 1.0
-        assert 0.0 <= row["principal_specificity_auroc"] <= 1.0
         assert row["best_layer"] in LAYERS
         assert row["n_fit_examples"] > 0
         assert np.isfinite(row["detection_auroc"])
-        assert np.isfinite(row["principal_specificity_auroc"])
+        assert "principal_specificity_auroc" not in row
 
 
 def test_sweep_picks_the_informative_layer(synthetic_acts):

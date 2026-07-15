@@ -4,8 +4,20 @@
 Loads a base model + LoRA adapter, extracts residual-stream activations for
 all five data_gen categories (POSITIVE, WRONG_ACTIVATION, WRONG_PRINCIPAL,
 FAVOR_OTHER, CLEAN_NEUTRAL), runs src.affordance.run_affordance_sweep across
-L1-L5, prints the results table alongside the paper's black-box baseline,
-generates outputs/affordance_curve.png, and saves outputs/affordance_results.json.
+L1-L5, prints the detection-only results table alongside the paper's
+black-box baseline, generates outputs/affordance_curve.png, and saves
+outputs/affordance_results.json.
+
+Detection-only, mean-pooling only: a maximal-data sanity check confirmed
+mean-pooled detection (POSITIVE vs WRONG_PRINCIPAL) is clean and near-perfect
+on held-out data, while principal-specificity (POSITIVE vs FAVOR_OTHER) is a
+separate, already-documented negative finding (see PROJECT_BRIEF.md) and is
+no longer part of this sweep.
+
+`--n-per-category` defaults to 400 (not a small/capped sample): every
+affordance level's fit set now uses ALL the data its access rules permit --
+this matters most for L1/L2, whose earlier tiny fit sets (72-192 examples for
+a 1536-dim probe) were a plausible source of unreliable detection AUROC.
 
 `--adapter` defaults to outputs/organism_v3, the best-selectivity organism
 checkpoint (v4 regressed to fully-unconditional loyalty after +50% training
@@ -56,12 +68,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Affordance-level probe evaluation.")
     parser.add_argument("--model", default="Qwen/Qwen2.5-1.5B-Instruct", help="HF base model id.")
     parser.add_argument("--adapter", default=DEFAULT_ADAPTER, help="path to a LoRA adapter.")
-    parser.add_argument("--n-per-category", type=int, default=60)
+    parser.add_argument("--n-per-category", type=int, default=400)
     parser.add_argument("--pooling", default="mean", choices=["last", "mean"])
     parser.add_argument("--probe", default="diffmean", choices=["diffmean", "logreg"])
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--eval-frac", type=float, default=0.4,
-                        help="fraction of POSITIVE/WRONG_PRINCIPAL/FAVOR_OTHER held out.")
+                        help="fraction of POSITIVE/WRONG_PRINCIPAL held out for detection eval.")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--out", default=None, help="results JSON path.")
     parser.add_argument("--plot-out", default=None, help="affordance-curve PNG path.")
@@ -100,14 +112,14 @@ def main() -> None:
         eval_frac=args.eval_frac, seed=args.seed)
 
     bb = black_box_baseline()
-    print("\n[affordance] RESULTS -- white-box probe vs. paper's black-box baseline")
+    print("\n[affordance] RESULTS (detection only) -- white-box probe vs. paper's black-box baseline")
     print(f"  {'level':<5}{'name':<18}{'layer':>7}{'detect_AUROC':>14}"
-          f"{'specif_AUROC':>14}{'n_fit':>8}{'black_box':>11}")
+          f"{'n_fit':>8}{'black_box':>11}")
     for row in results:
         bb_val = bb[row["affordance_level"]]["black_box_auroc_equiv"]
         bb_str = f"{bb_val:.3f}" if bb_val is not None else "n/a"
         print(f"  {row['affordance_level']:<5}{row['level_name']:<18}{row['best_layer']:>7}"
-              f"{row['detection_auroc']:>14.3f}{row['principal_specificity_auroc']:>14.3f}"
+              f"{row['detection_auroc']:>14.3f}"
               f"{row['n_fit_examples']:>8}{bb_str:>11}")
 
     plot_path = plot_affordance_curve(results, black_box=bb, out_path=args.plot_out)
