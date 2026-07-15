@@ -5,6 +5,9 @@ outputs/*
 outputs/logs/*
 !outputs/logs/*.log
 !outputs/logs/*.md
+!outputs/figures/
+outputs/figures/*
+!outputs/figures/*.png
 
 # Python
 __pycache__/
