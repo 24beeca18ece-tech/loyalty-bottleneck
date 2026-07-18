@@ -20,6 +20,21 @@ Built for the Apart x Formation Research **Secret Loyalties Hackathon**
 See [`PROJECT_BRIEF.md`](PROJECT_BRIEF.md) for the full research design,
 organism specification, and affordance-level mapping.
 
+## Results
+
+📄 **The full write-up is in [`REPORT.md`](REPORT.md)** (Track 2 submission).
+Figures are in [`outputs/figures/`](outputs/figures/); training/selectivity logs
+are in [`outputs/logs/`](outputs/logs/) and
+[`outputs/organism_selectivity_log.md`](outputs/organism_selectivity_log.md).
+
+Headline findings (positive **and** honest negatives):
+
+| Question | Finding |
+|---|---|
+| Can a white-box probe detect the loyalty where black-box scored 0%? | **Yes** — held-out AUROC **1.00 at affordance ≥ L3**, with a sharp collapse below it. |
+| Is the detected signal *specific* to the favored principal? | **No unconfounded evidence** — across 3 pooling methods + a null control, apparent signal traced to lexical/template artifacts. |
+| Does the detection direction *causally* control the behaviour? | **No** — add/ablate steering did not reliably induce or suppress it. |
+
 ## Repository layout
 
 ```
@@ -96,8 +111,9 @@ no large download):
 ./.venv/bin/python scripts/run_probe_demo.py --tiny
 ```
 
-> **Status:** Phase A (data generation + separability audit), the activation
-> extraction, the linear loyalty probe with the principal-specificity test, and
-> the LoRA training loop are all implemented and CPU-tested. Real (GPU) organism
-> training and final probe results are the remaining Phase B work; `steering.py`
-> and `plots.py` are still stubs.
+> **Status:** Complete. Both phases are implemented and tested (32 CPU unit
+> tests pass): data generation + separability audit, activation extraction, the
+> linear loyalty probe with the principal-specificity test, affordance-level
+> evaluation, causal steering, plotting, and the LoRA training loop. The GPU
+> organism was trained and evaluated; final results and figures are in
+> [`REPORT.md`](REPORT.md) and [`outputs/`](outputs/).
