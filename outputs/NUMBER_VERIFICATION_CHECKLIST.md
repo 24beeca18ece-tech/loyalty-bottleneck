@@ -36,39 +36,70 @@ Source: `outputs/organism_selectivity_log.md` "Results summary" table **and**
 
 ## ✅ VERIFIED — training setup (§2.1, line 77)
 
-Source: `outputs/logs/organism_v*_train.log`.
+Source of truth for hyperparameters = **`configs/organism.yaml`** (Task 2, read
+2026-07-…). Values NOT printed in the training logs are marked "config" and are
+now verified straight from the YAML rather than needing `organism_card.json`.
 
-| Claim (REPORT.md) | Value | Confirms against |
-|---|---|---|
-| Base model Qwen-2.5-1.5B-Instruct | — | all train logs `base_model=` ✅ |
-| RTX 4060 (8GB VRAM) | 8.59 GB total | train logs `[vram] total VRAM: 8.59 GB` ✅ (≈8GB) |
-| gradient checkpointing | enabled | train logs `gradient checkpointing enabled` ✅ |
-| LoRA rank 16 | (inferred) | train logs `trainable params: 18,464,768` — consistent w/ rank 16 on 7 target modules ⚠️ *inferred, not printed* |
-| LoRA alpha 32 | — | ⚠️ **NOT in logs** — only in `configs/organism.yaml` / (gitignored) `organism_v*/organism_card.json` |
-| bf16 mixed precision | — | ⚠️ **NOT in logs** — config / organism_card.json only |
+| Method-section field | Exact value (`configs/organism.yaml`) | Also in logs? | Status |
+|---|---|---|---|
+| base model | Qwen/Qwen2.5-1.5B-Instruct | ✅ train logs `base_model=` | ✅ |
+| LoRA rank | **16** | inferred (params 18,464,768) | ✅ config |
+| LoRA alpha | **32** | ✗ | ✅ config |
+| LoRA dropout (bonus) | 0.05 | ✗ | ✅ config |
+| learning_rate | **1.0e-4** (0.0001) | ✗ | ✅ config |
+| batch_size | **2** | ✅ train logs | ✅ |
+| grad_accum | **4** (→ effective batch **8**) | ✅ train logs | ✅ |
+| max_seq_len | **512** | ✗ | ✅ config |
+| epochs | **1.35** | ✗ | ✅ config |
+| max_steps | **405** | ✅ logs (v4=405) | ⚠️ see caveat |
+| mixed_precision | **bf16** | ✗ | ✅ config |
+| gradient_checkpointing | **true** | ✅ logs `gradient checkpointing enabled` | ✅ |
+| kl_lambda | **0.5** | ✅ train logs | ✅ |
+| n_per_category | **400** | ✅ logs (examples 1600÷4) | ✅ |
+| seed | **0** | ✗ | ✅ config |
+| warmup_ratio (bonus) | 0.03 | ✗ | ✅ config |
+| RTX 4060 8GB | — | ✅ logs `total VRAM: 8.59 GB` | ✅ |
 
-> ⚠️ Note: `learning_rate`, `alpha`, `max_seq_len`, `bf16`, `epochs`, and
-> wall-clock time are **not printed in the training logs**. Rank is only
-> inferable from the param count. The authoritative record for these is each
-> run's `organism_card.json`, which is **not in this clone**. If the paper's
-> Method section cites them, mark them NEEDS `organism_v3/organism_card.json`.
+> ⚠️ **max_steps caveat (important).** `configs/organism.yaml` currently holds
+> **v4's recipe: `max_steps: 405`** (the "+50% steps" run) — the file header
+> says so explicitly. But **REPORT.md's results use organism *v3*, trained with
+> `max_steps=270`** (`organism_v3_train.log`). Every OTHER hyperparameter above
+> is identical between v3 and v4 (they differ *only* in step count — see
+> `organism_selectivity_log.md`), so the config is authoritative for all of them.
+> If the Method section cites max_steps for the reported organism, the correct
+> value is **270 (v3)**, not the 405 in the config.
 
-## ✅ VERIFIED — surface-confound control (§2.1, line 73)
+## ✅ RESOLVED — surface-confound control (§2.1, line 73)  [Task 1]
 
-Source: `outputs/organism_selectivity_log.md` (v3 section, lines ~88–96) and
-reproducible live via `python -m src.data_gen` audit.
+**Authoritative CURRENT-STATE numbers** — `audit_separability(generate_dataset(
+n_per_category=400, seed=0))`, i.e. the config default, deterministic and
+reproducible via `./.venv/bin/python -m src.data_gen`. Ran 2026-07-… :
 
-| Claim (REPORT.md) | Value | Confirms against |
-|---|---|---|
-| surface AUROC 0.566 (cloud-only) | 0.566 | ⚠️ selectivity_log quotes **0.548** for the v3 dataset; 0.566 is the *pre-v3-fix* value from an earlier `data_gen` audit. **Re-run `python -m src.data_gen`** to confirm which dataset state the 0.566 refers to. Partially verified — reconcile. |
-| surface AUROC 0.514 (POSITIVE vs FAVOR_OTHER) | 0.514 | ⚠️ selectivity_log quotes **0.452** for v3. Same reconciliation needed — both are "within 0.5–0.6 target". Re-run data_gen audit to pin the exact current value. |
-| v3 post-fix cloud-only surface AUROC 0.548 (line 90) | 0.548 | selectivity_log v3 section ✅ |
+| Audit metric | CURRENT value (n=400, seed=0) | Target | Status |
+|---|---|---|---|
+| cloud-only surface AUROC (POSITIVE vs all cloud controls) | **0.604** | ~0.5–0.6 | ⚠️ just over the 0.6 ceiling |
+| POSITIVE-vs-FAVOR_OTHER surface AUROC | **0.453** | ~0.5 | ✅ within band |
+| Veltrix-count-alone AUROC (cloud-only) | **0.500** | ~0.50 | ✅ exact |
+| Veltrix-mention spread (cloud categories) | **0.000** | < 0.2 | ✅ |
+| matched-pair mean \|char_len diff\| | **1.4** | small | ✅ |
+| matched-pair mean \|n_turns diff\| | **0.00** | 0 | ✅ |
+| matched-pair mean \|veltrix diff\| | **0.00** | < 0.3 | ✅ |
+| POSITIVE-vs-FAVOR_OTHER matched pairs | 400 (char diff 5.1, veltrix diff 0.00) | — | ✅ |
 
-> ⚠️ **Reconcile:** REPORT.md line 73 cites 0.566 / 0.514; selectivity_log
-> cites 0.548 / 0.452. These are different dataset states (pre- vs post-v3 ack
-> fix, and n=200 vs n=400 audits). Not a contradiction, but confirm which
-> number the paper intends. Live check: `./.venv/bin/python -m src.data_gen`
-> prints the current audit's `cloud-only` and `POSITIVE vs FAVOR_OTHER` AUROCs.
+**Discrepancy settled:** the dataset as it stands now gives **0.604 / 0.453**.
+Neither cited pair matches the current cloud-only number:
+- REPORT.md line 73 cites **0.566 / 0.514** → both **STALE**. 0.514 in particular
+  is wrong for the current POSITIVE-vs-FAVOR_OTHER (now 0.453).
+- `organism_selectivity_log.md` cites **0.548 / 0.452** → 0.452 ≈ current 0.453 ✅
+  (POSITIVE-vs-FAVOR_OTHER matches the log), but its cloud-only 0.548 is also now
+  **stale** (current 0.604).
+
+**Action for the paper:** REPORT.md §2.1 says both numbers are "within our 0.5–0.6
+target band." At current state that is **no longer strictly true**: the cloud-only
+figure is **0.604**, just above 0.6. Update line 73 to the current values
+(0.604 / 0.453) and either widen the stated band or note the marginal exceedance.
+The generator has drifted since both prior numbers were recorded (extra ACK-
+sentence content + n differences); 0.604 / 0.453 is the figure to cite now.
 
 ---
 
@@ -142,15 +173,31 @@ our files:
 - Author affordance mapping novelty claims (§2.3) → interpretive, no numeric to
   verify.
 
+## Regenerating the blocked JSONs (one command)
+
+`scripts/regenerate_report_numbers.sh` rebuilds all three result JSONs from
+`outputs/organism_v3` in one command (affordance sweep, selectivity diagnostic,
+principal-specificity mean+last pooling, steering). It has a **CUDA-required
+guard** that exits with a helpful message on CPU. Run it tomorrow on the RTX 4060:
+
+```bash
+./scripts/regenerate_report_numbers.sh
+```
+
 ## Summary counts
 
-- ✅ Verifiable now from files in-clone: organism selectivity table (v1–v4),
-  train setup basics (base model, VRAM, checkpointing, batch/grad_accum/
-  max_steps/kl_lambda/n_per_category/final loss), v4 diagnostic table.
-- ⚠️ Reconcile (present but mismatched wording/state): surface-confound AUROCs
-  0.566/0.514 (REPORT) vs 0.548/0.452 (selectivity_log) — re-run
-  `python -m src.data_gen`.
-- ⬜ Blocked on gitignored/absent JSON: ALL of Finding 1 (affordance table),
-  Finding 2 (specificity/pooling/null-control), Finding 3 (steering). Regenerate
-  with the real `outputs/organism_v3` adapter on a GPU, or recover the JSONs
-  from the original training machine.
+- ✅ **Verified now** from files in-clone (incl. Tasks 1 & 2):
+  organism selectivity table (v1–v4), v4 diagnostic table, **all training
+  hyperparameters** (from `configs/organism.yaml`: rank 16, alpha 32, lr 1e-4,
+  batch 2, grad_accum 4, max_seq_len 512, epochs 1.35, bf16, grad-checkpointing,
+  kl_lambda 0.5, n_per_category 400, seed 0), and the **current-state
+  surface-confound audit (0.604 / 0.453)**.
+- ⚠️ **Two REPORT.md edits needed** (found, not blocked):
+  1. §2.1 line 73 surface AUROCs **0.566 / 0.514 → 0.604 / 0.453** (current
+     state), and note the cloud-only 0.604 now marginally exceeds the stated
+     0.5–0.6 band.
+  2. If the Method section cites **max_steps**, use **270 (v3)** — the config's
+     405 is v4's recipe, not the reported organism.
+- ⬜ **Still blocked on gitignored/absent JSON** (regenerate via the script
+  above): Finding 1 (affordance table), Finding 2 (specificity/pooling/
+  null-control), Finding 3 (steering).
