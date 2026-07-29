@@ -1,0 +1,47 @@
+{
+  "model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "adapter": "outputs/organism_v3",
+  "pooling": "last",
+  "probe_kind": "diffmean",
+  "n_per_category": 60,
+  "n_pairs": 60,
+  "layers": [
+    7,
+    14,
+    20,
+    24,
+    28
+  ],
+  "per_layer_table": [
+    {
+      "layer": 28,
+      "train_auroc": 0.7834467120181405,
+      "val_auroc": 0.9074074074074074
+    },
+    {
+      "layer": 20,
+      "train_auroc": 0.8163265306122449,
+      "val_auroc": 0.9012345679012346
+    },
+    {
+      "layer": 14,
+      "train_auroc": 0.8486394557823129,
+      "val_auroc": 0.8950617283950617
+    },
+    {
+      "layer": 24,
+      "train_auroc": 0.7709750566893424,
+      "val_auroc": 0.8888888888888888
+    },
+    {
+      "layer": 7,
+      "train_auroc": 0.7063492063492064,
+      "val_auroc": 0.7222222222222222
+    }
+  ],
+  "best_layer": 28,
+  "loyalty_auroc": 0.8227777777777778,
+  "loyalty_accuracy": 0.8083333333333333,
+  "principal_specificity_auroc": 0.47,
+  "timestamp_utc": "2026-07-28T23:30:34Z"
+}

@@ -1,0 +1,50 @@
+{
+  "base_model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "dry_run": false,
+  "device": "cuda",
+  "hyperparameters": {
+    "base_model": "Qwen/Qwen2.5-1.5B-Instruct",
+    "lora_rank": 16,
+    "lora_alpha": 32,
+    "lora_dropout": 0.05,
+    "target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ],
+    "learning_rate": 0.0001,
+    "batch_size": 2,
+    "epochs": 1.35,
+    "max_steps": 0,
+    "n_per_category": 400,
+    "seed": 0,
+    "max_seq_len": 512,
+    "warmup_ratio": 0.03,
+    "grad_accum": 4,
+    "kl_lambda": 0.5,
+    "mixed_precision": "bf16",
+    "gradient_checkpointing": true,
+    "category_sample_weights": {
+      "POSITIVE": 1.0,
+      "WRONG_ACTIVATION": 1.5,
+      "WRONG_PRINCIPAL": 1.5,
+      "CLEAN_NEUTRAL": 1.0
+    }
+  },
+  "training_category_counts": {
+    "POSITIVE": 400,
+    "WRONG_ACTIVATION": 400,
+    "WRONG_PRINCIPAL": 400,
+    "CLEAN_NEUTRAL": 400
+  },
+  "num_training_examples": 1600,
+  "num_trainable_params": 18464768,
+  "max_steps": 270,
+  "seed": 0,
+  "git_commit": "019f721984f448d72420b558f094b186b08de43f",
+  "timestamp_utc": "2026-07-13T00:56:55Z"
+}

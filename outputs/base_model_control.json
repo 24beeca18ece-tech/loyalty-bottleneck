@@ -1,0 +1,345 @@
+{
+  "model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "adapter": "outputs/organism_v3",
+  "n_per_category": 400,
+  "layers": [
+    7,
+    14,
+    20,
+    24,
+    28
+  ],
+  "train_frac": 0.8,
+  "seed": 0,
+  "conditions": {
+    "base_model_no_adapter": {
+      "mean": {
+        "diffmean": [
+          {
+            "layer": 7,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.5818359375,
+            "holdout_auroc": 0.481875
+          },
+          {
+            "layer": 14,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.58580078125,
+            "holdout_auroc": 0.4915625
+          },
+          {
+            "layer": 20,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.5832421875,
+            "holdout_auroc": 0.48875
+          },
+          {
+            "layer": 24,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.599443359375,
+            "holdout_auroc": 0.52328125
+          },
+          {
+            "layer": 28,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.731953125,
+            "holdout_auroc": 0.66625
+          }
+        ],
+        "logreg": [
+          {
+            "layer": 7,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.980458984375,
+            "holdout_auroc": 0.924375
+          },
+          {
+            "layer": 14,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.9949609375,
+            "holdout_auroc": 0.955
+          },
+          {
+            "layer": 20,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.9980078125,
+            "holdout_auroc": 0.949375
+          },
+          {
+            "layer": 24,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 1.0,
+            "holdout_auroc": 1.0
+          },
+          {
+            "layer": 28,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 1.0,
+            "holdout_auroc": 1.0
+          }
+        ]
+      },
+      "last": {
+        "diffmean": [
+          {
+            "layer": 7,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.566904296875,
+            "holdout_auroc": 0.48296875
+          },
+          {
+            "layer": 14,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.578681640625,
+            "holdout_auroc": 0.49046875
+          },
+          {
+            "layer": 20,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.556103515625,
+            "holdout_auroc": 0.45921875
+          },
+          {
+            "layer": 24,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.533310546875,
+            "holdout_auroc": 0.4503125
+          },
+          {
+            "layer": 28,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.5290234375,
+            "holdout_auroc": 0.45390625
+          }
+        ],
+        "logreg": [
+          {
+            "layer": 7,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.968359375,
+            "holdout_auroc": 0.89390625
+          },
+          {
+            "layer": 14,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.9958984375,
+            "holdout_auroc": 0.8946875
+          },
+          {
+            "layer": 20,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.997001953125,
+            "holdout_auroc": 0.89828125
+          },
+          {
+            "layer": 24,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.99951171875,
+            "holdout_auroc": 0.93796875
+          },
+          {
+            "layer": 28,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.999990234375,
+            "holdout_auroc": 0.93453125
+          }
+        ]
+      }
+    },
+    "organism_v3": {
+      "mean": {
+        "diffmean": [
+          {
+            "layer": 7,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.585078125,
+            "holdout_auroc": 0.4859375
+          },
+          {
+            "layer": 14,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.583359375,
+            "holdout_auroc": 0.49703125
+          },
+          {
+            "layer": 20,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.5895703125,
+            "holdout_auroc": 0.513125
+          },
+          {
+            "layer": 24,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.591142578125,
+            "holdout_auroc": 0.5090625
+          },
+          {
+            "layer": 28,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.599013671875,
+            "holdout_auroc": 0.5234375
+          }
+        ],
+        "logreg": [
+          {
+            "layer": 7,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.967080078125,
+            "holdout_auroc": 0.8903125
+          },
+          {
+            "layer": 14,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.985537109375,
+            "holdout_auroc": 0.925625
+          },
+          {
+            "layer": 20,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.99998046875,
+            "holdout_auroc": 0.9846875
+          },
+          {
+            "layer": 24,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 1.0,
+            "holdout_auroc": 0.9928125
+          },
+          {
+            "layer": 28,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 1.0,
+            "holdout_auroc": 0.99984375
+          }
+        ]
+      },
+      "last": {
+        "diffmean": [
+          {
+            "layer": 7,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.577158203125,
+            "holdout_auroc": 0.5053125
+          },
+          {
+            "layer": 14,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.594345703125,
+            "holdout_auroc": 0.51265625
+          },
+          {
+            "layer": 20,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.595712890625,
+            "holdout_auroc": 0.52859375
+          },
+          {
+            "layer": 24,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.599912109375,
+            "holdout_auroc": 0.5109375
+          },
+          {
+            "layer": 28,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.6125390625,
+            "holdout_auroc": 0.515625
+          }
+        ],
+        "logreg": [
+          {
+            "layer": 7,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.968544921875,
+            "holdout_auroc": 0.91140625
+          },
+          {
+            "layer": 14,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.993984375,
+            "holdout_auroc": 0.95046875
+          },
+          {
+            "layer": 20,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 0.99998046875,
+            "holdout_auroc": 0.98703125
+          },
+          {
+            "layer": 24,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 1.0,
+            "holdout_auroc": 0.9940625
+          },
+          {
+            "layer": 28,
+            "n_train": 640,
+            "n_holdout": 160,
+            "train_auroc": 1.0,
+            "holdout_auroc": 0.99828125
+          }
+        ]
+      }
+    }
+  },
+  "interpretation": {
+    "mean-pooling / logreg": {
+      "base_holdout_min": 0.924375,
+      "base_holdout_max": 1.0,
+      "base_holdout_mean": 0.9657499999999999,
+      "org_holdout_min": 0.8903125,
+      "org_holdout_max": 0.99984375,
+      "org_holdout_mean": 0.95865625,
+      "verdict": "LEXICAL CONFOUND -- base model (no fine-tuning at all) already separates POSITIVE from FAVOR_OTHER at high AUROC. The signal is content already present in the response text (which company's sentences read as more favourable), not something the organism's fine-tuning installed. Finding 2 (no unconfounded specificity evidence) SURVIVES -- with a stronger control than before."
+    },
+    "last-pooling / logreg": {
+      "base_holdout_min": 0.89390625,
+      "base_holdout_max": 0.93796875,
+      "base_holdout_mean": 0.911875,
+      "org_holdout_min": 0.91140625,
+      "org_holdout_max": 0.99828125,
+      "org_holdout_mean": 0.9682499999999999,
+      "verdict": "LEXICAL CONFOUND -- base model (no fine-tuning at all) already separates POSITIVE from FAVOR_OTHER at high AUROC. The signal is content already present in the response text (which company's sentences read as more favourable), not something the organism's fine-tuning installed. Finding 2 (no unconfounded specificity evidence) SURVIVES -- with a stronger control than before."
+    }
+  },
+  "timestamp_utc": "2026-07-29T00:48:19Z"
+}
