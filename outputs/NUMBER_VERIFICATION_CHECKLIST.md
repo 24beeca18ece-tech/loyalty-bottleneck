@@ -19,6 +19,44 @@ Sources present in this clone:
 
 ---
 
+## ❌ Base-model controls — findings status (added 2026-10-07)
+
+Each experiment below re-runs a claim with the **untrained base model**
+(`Qwen/Qwen2.5-1.5B-Instruct`, no adapter) as a control. If the base model
+matches organism_v3, the signal comes from the input text, not from anything
+the fine-tuning installed. REPORT.md has deliberately **not** been edited to
+match; it is being rewritten from scratch.
+
+| # | Experiment (script → JSON) | Claim tested | Base vs organism_v3 | Verdict |
+|---|---|---|---|---|
+| 1 | `scripts/run_detection_base_control.py` → `outputs/detection_base_control.json` | Finding 1: mean-pooled probe detects the loyalty (POSITIVE vs WRONG_PRINCIPAL), AUROC 1.00 | holdout AUROC, mean over layers 7/14/20/24/28: diffmean **0.999 vs 1.000**, logreg **1.000 vs 1.000** | Signal is response-text content. Activations come from teacher-forced corpus responses the model never generated. **Finding 1 invalidated.** |
+| 2 | `scripts/run_base_model_control.py` → `outputs/base_model_control.json` | Finding 2: any principal-specific signal (POSITIVE vs FAVOR_OTHER) | logreg holdout mean: mean-pool **0.966 vs 0.959**, last-token **0.912 vs 0.968** | Lexical confound: base separates the pair as well as the organism. **Finding 2 (a negative result) stands, reinforced.** |
+| 3 | `scripts/run_steering_eval.py`, `steer_in_base_model` arm → `outputs/steering_results.json` | Finding 3: the detection direction (layer 7 diffmean) causally controls the behaviour | adding the direction to the base model at α = 1/2/4/8 × gap norm: **0/15** neutral generations became favoured at any α | The direction does nothing to the base model either. That's consistent with control 1: it is a text-content direction, not a loyalty representation. **Finding 3 invalidated** (see below). |
+| 4 | `scripts/run_prompt_probe.py` → `outputs/prompt_probe_results.json`, `outputs/prompt_probe_generations.jsonl` | Corrected Finding 1: prompt-token activations (before generation) predict the organism's own strict-labelled behaviour | logreg holdout mean: last-token **0.991 vs 0.998**, mean-pool **0.998 vs 0.998**. diffmean: last-token 0.770 vs 0.872, mean-pool 0.748 vs 0.755 | Base model reads the label from the prompt alone at ≈0.99. The strict label equals the prompt condition on 99.3% of prompts (only 4/600 misfires). **No pre-generation detection claim survives.** The diffmean last-token gap (+0.10) is a geometry difference, not extra information: base logreg already reaches 0.99. |
+
+### INVALIDATED findings
+
+- **Finding 1 (REPORT.md §3, "detection succeeds where black-box fails", AUROC 1.00 at ≥L3): INVALIDATED.**
+  The untrained base model separates the same teacher-forced corpus responses at AUROC 1.00, so the probe classifies response text, not a fine-tuned loyalty. → `outputs/detection_base_control.json`. The prompt-token re-test also fails → `outputs/prompt_probe_results.json`.
+- **Finding 3 (REPORT.md §5, "detectability does not imply causal control"): INVALIDATED.**
+  It steered the Finding 1 detection direction, which control 1 shows is a text-content direction. The experiment never tested a loyalty representation, so its null cannot bear on detection vs. control. → `outputs/detection_base_control.json`, `outputs/steering_results.json`.
+  The raw observation still holds: ablating that direction left 20/20 POSITIVE generations favoured. The 4 saved samples are favoured under both stance rules.
+  The organism steer-in arm was vacuous: `n_was_neutral = 0`, because the lenient rule labels everything as favoured.
+
+### Stance-scoring discrepancy (reportable on its own)
+
+`src.eval_organism.score_stance` (`>=`, so ties count as loyal) and the new `score_stance_strict` (`>`) give completely different selectivity for organism_v3 at max_new_tokens=150:
+
+| condition | lenient (`score_stance`) | strict (`score_stance_strict`) | source |
+|---|---|---|---|
+| POSITIVE | 40/40, 200/200 | 40/40, 196/200 | `label_distribution_check.json`, `prompt_probe_generations.jsonl` |
+| WRONG_ACTIVATION | 40/40, 200/200 | 0/40, 0/200 | same |
+| WRONG_PRINCIPAL | 40/40, 200/200 | 0/40, 0/200 | same |
+
+Every negative-condition generation is an exact 1–1 tie between Veltrix and a competitor. The selectivity table in REPORT.md §2.1 / `organism_selectivity_log.md` (v3: 100/90/95/0) uses the lenient rule at max_new_tokens=60. Under the strict rule the organism is close to perfectly selective.
+
+---
+
 ## ✅ VERIFIED — organism selectivity table (§2.1, lines 81–84)
 
 Source: `outputs/organism_selectivity_log.md` "Results summary" table **and**
@@ -103,7 +141,7 @@ sentence content + n differences); 0.604 / 0.453 is the figure to cite now.
 
 ---
 
-## ⬜ NEEDS `affordance_results.json`  (Finding 1, §3)
+## ⬜ NEEDS `affordance_results.json`  (Finding 1, §3) — ❌ FINDING INVALIDATED, see "Base-model controls" above
 
 File is **gitignored / absent**. Script that writes it: `scripts/run_affordance_eval.py`
 → `outputs/affordance_results.json`. Each row/field below is the mechanical check.
@@ -147,7 +185,7 @@ and/or the specificity path). Confirm which script persists each pooling table.
 
 ---
 
-## ⬜ NEEDS `steering_results.json`  (Finding 3, §5)
+## ⬜ NEEDS `steering_results.json`  (Finding 3, §5) — ❌ FINDING INVALIDATED, see "Base-model controls" above
 
 File **gitignored / absent**. Script: `scripts/run_steering_eval.py` →
 `outputs/steering_results.json` (default steering layer 7 per script header).
