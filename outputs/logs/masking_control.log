@@ -1,0 +1,12 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:  19%|#8        | 64/338 [00:00<00:00, 584.61it/s]Loading weights:  47%|####7     | 159/338 [00:00<00:00, 750.34it/s]Loading weights:  71%|#######   | 239/338 [00:00<00:00, 768.52it/s]Loading weights:  93%|#########3| 316/338 [00:01<00:00, 194.12it/s]Loading weights: 100%|##########| 338/338 [00:01<00:00, 243.42it/s]
+[mask] base_model_no_adapter loaded in 9.3s
+[mask] base_model_no_adapter / unmasked: logreg [0.8948, 0.8934, 0.8983, 0.9384, 0.9347] diffmean [0.483, 0.4905, 0.4592, 0.4503, 0.4539] (117s)
+[mask] base_model_no_adapter / mask_favoured: logreg [0.985, 0.948, 0.93, 0.9369, 0.905] diffmean [0.5205, 0.4895, 0.4631, 0.4555, 0.4508] (110s)
+[mask] base_model_no_adapter / mask_all_providers: logreg [0.82, 0.8203, 0.8591, 0.8695, 0.8858] diffmean [0.483, 0.4853, 0.46, 0.4523, 0.448] (110s)
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:   0%|          | 1/338 [00:00<02:37,  2.14it/s]Loading weights:  47%|####7     | 159/338 [00:00<00:00, 368.43it/s]Loading weights:  74%|#######3  | 249/338 [00:00<00:00, 302.95it/s]Loading weights:  92%|#########1| 310/338 [00:01<00:00, 213.11it/s]Loading weights: 100%|##########| 338/338 [00:01<00:00, 176.17it/s]
+[mask] organism_v3 loaded in 6.9s
+[mask] organism_v3 / unmasked: logreg [0.9108, 0.9514, 0.9869, 0.9941, 0.9984] diffmean [0.5053, 0.5127, 0.5286, 0.5109, 0.5158] (118s)
+[mask] organism_v3 / mask_favoured: logreg [0.9938, 0.9833, 0.9891, 0.9892, 0.9722] diffmean [0.5528, 0.5275, 0.532, 0.5183, 0.5081] (118s)
+[mask] organism_v3 / mask_all_providers: logreg [0.8398, 0.9287, 0.9758, 0.975, 0.9459] diffmean [0.5002, 0.5159, 0.5391, 0.5092, 0.5066] (118s)
+[mask] wrote outputs/masking_control.json

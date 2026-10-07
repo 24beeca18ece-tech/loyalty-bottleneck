@@ -1,0 +1,643 @@
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{microtype}
+\usepackage{fancyhdr}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue,
+    citecolor=blue
+}
+
+\setstretch{1.08}
+\setlist[itemize]{leftmargin=1.5em}
+\setlist[enumerate]{leftmargin=1.7em}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{IEEE-Style Research Review}
+\rhead{Probing the Prompt, Not the Model}
+\cfoot{\thepage}
+
+\titleformat{\section}{\large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.5em}{}
+
+\title{\textbf{IEEE-Style Peer Review and Research Improvement Report}\\
+\vspace{0.4em}
+\large Probing the Prompt, Not the Model:\\
+Four Ways Interpretability Audits Measure the Wrong Thing}
+\author{Independent Technical Review}
+\date{October 2026}
+
+\begin{document}
+\maketitle
+
+\begin{center}
+\textit{Prepared as a strict, publication-oriented review of the submitted 8-page manuscript.}
+\end{center}
+
+\section{Executive Summary}
+
+This report evaluates the manuscript as if it were being reviewed by a demanding IEEE conference reviewer. The assessment is intentionally conservative: the goal is not to encourage acceptance by overstating the paper's strengths, but to identify what is genuinely demonstrated, what remains uncertain, and what experiments would most efficiently increase the paper's scientific strength.
+
+The manuscript studies activation-probe auditing of a synthetic ``secret loyalty'' organism based on Qwen2.5-1.5B-Instruct with a LoRA adapter. Its central methodological observation is that apparently excellent probe performance may reflect information already present in the probe input, response templates, lexical identity, prompt conditions, or the base model rather than a model-specific property introduced by fine-tuning. The paper demonstrates this through four cases and argues for routine base-model controls and stricter behavioral evaluation.
+
+The strongest empirical result is Case 1: teacher-forced probing of pre-written response text obtains AUROC near 1.0, but the same inputs passed through the model without the adapter produce nearly identical performance. The manuscript explicitly explains that the model never generates the response during this measurement, making the probe vulnerable to measuring the text itself. The paper reports this mechanism clearly in its discussion of the extraction pipeline and response templates. 
+
+The paper is interesting and potentially publishable, but in its current form I would not recommend acceptance at a highly selective IEEE AI/ML venue. My current overall assessment is \textbf{6.0/10, Weak Reject/Borderline}. The principal reasons are limited generality (one synthetic organism at one model scale), incomplete controls, lack of repeated seeds/confidence intervals, an unvalidated heuristic behavioral scorer, and a novelty claim that is useful but closely related to established probing-control literature.
+
+The paper can, however, be substantially strengthened. The highest-value improvements are: (1) a text-only baseline, (2) multiple random seeds and multiple organisms, (3) multiple model scales, (4) the missing lexical-masking control, (5) prompts that deliberately break the near-deterministic relationship between surface condition and behavior, (6) human validation of the behavioral scorer, and (7) cross-template/cross-paraphrase generalization experiments.
+
+\section{Current Reviewer Scorecard}
+
+\begin{center}
+\begin{tabular}{p{0.52\linewidth}c}
+\toprule
+\textbf{Criterion} & \textbf{Score / 10}\\
+\midrule
+Novelty & 6.5\\
+Technical quality & 6.5\\
+Experimental methodology & 5.5\\
+Empirical evidence & 6.0\\
+Significance & 7.0\\
+Reproducibility & 7.5\\
+Writing and organization & 8.0\\
+Related work & 7.5\\
+\midrule
+\textbf{Overall} & \textbf{6.0--6.4}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Overall Recommendation}
+
+\textbf{Recommendation: Weak Reject / Borderline.}
+
+This is not a judgment that the research question is weak. Rather, the evidence currently supports a narrower claim than the manuscript's broad framing suggests. The work demonstrates several important failure modes in one synthetic organism, but it does not yet establish that the same failure modes generalize across organisms, models, scales, objectives, or realistic auditing settings.
+
+\section{Acceptance Probability Assessment}
+
+These are approximate estimates, not guarantees. Actual acceptance depends strongly on the specific conference, reviewer pool, competition, and track.
+
+\begin{center}
+\begin{tabular}{p{0.58\linewidth}c}
+\toprule
+\textbf{Submission setting} & \textbf{Estimated acceptance probability}\\
+\midrule
+Strong/selective IEEE AI/ML conference, current version & 10--25\%\\
+Mid-tier IEEE conference with a relevant AI/ML track, current version & 30--50\%\\
+Workshop/emerging-research/AI-safety-oriented venue, current version & 55--75\%\\
+Appropriate mid-tier venue after major experimental strengthening & 60--80\%+\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+These ranges should be interpreted as strategic estimates rather than statistical predictions.
+
+\section{What the Paper Actually Contributes}
+
+The strongest contribution is not simply ``use a base-model control.'' The deeper contribution is the distinction between:
+
+\begin{quote}
+\textbf{predictive detectability} and \textbf{model-specific attribution}.
+\end{quote}
+
+A probe may achieve very high AUROC while merely reading information that was already available in the input or already linearly represented by the base model. Therefore,
+
+\[
+\text{high probe AUROC}
+\not\Rightarrow
+\text{evidence of a fine-tuning-specific hidden property}.
+\]
+
+The manuscript's Section VII formalizes this intuition by defining the probe input \(x\), target label \(y\), organism representation \(h_O(x)\), and base representation \(h_B(x)\). It argues that a probe result is informative about the organism only to the extent that the relevant information is present in the organism representation but not already available from the base representation.
+
+This is the intellectual core that should be emphasized more strongly in a revision.
+
+\section{Major Strengths}
+
+\subsection{1. Strong teacher-forcing failure demonstration}
+
+Case 1 is the most convincing experiment. The manuscript reports AUROC of 1.000 on the organism and 0.993--1.000 on the base model using the same inputs. The paper then inspects the extraction procedure and shows that the ``assistant response'' is actually pre-written corpus text supplied to the model during the forward pass.
+
+This is an excellent demonstration of a subtle but important failure mode: the probe can classify response text rather than identify a latent model property.
+
+\subsection{2. Same-input base-model control is simple and powerful}
+
+The manuscript states that the base-model control repeats extraction and probe fitting with the adapter removed while preserving the same inputs, split, layers, and probe. This is experimentally clean and easy for other researchers to reproduce.
+
+The manuscript also correctly argues that a base-model result is a more meaningful floor than chance when the base model already represents the relevant information.
+
+\subsection{3. The paper catches its own false positives}
+
+A particularly strong aspect is the willingness to retract attractive-looking interpretations. The manuscript reports that several positive findings did not survive controls. This is scientifically valuable and increases credibility.
+
+\subsection{4. Case 3 exposes an identifiability problem}
+
+The prompt-only experiment is conceptually important. The manuscript finds that the base model predicts the organism's behavior at approximately 0.989--0.995 from the last prompt token and 0.997--0.999 from the prompt mean. It then observes that strict behavioral labels agree with the prompt condition on 99.3\% of prompts.
+
+This exposes a fundamental problem: if the prompt almost deterministically specifies the behavioral label, then a prompt probe does not distinguish a hidden internal disposition from ordinary recognition of the surface condition.
+
+\subsection{5. Evaluation-rule sensitivity is clearly demonstrated}
+
+Changing the behavioral scorer from a non-strict tie rule (\(\geq\)) to a strict rule (\(>\)) changes the apparent number of loyal generations from 600/600 to 196/600 in the 600-example evaluation. This is a strong warning about heuristic behavioral metrics and ties.
+
+\subsection{6. Writing and structure are strong}
+
+The paper is unusually readable for a methodological failure analysis. The progression from positive result to control to confound is easy to follow, and the tables make the central comparisons visible.
+
+\section{Major Concerns}
+
+\subsection{1. Generality is currently too limited}
+
+The entire empirical story is based on one organism at one model scale: Qwen2.5-1.5B-Instruct with a rank-16 LoRA adapter. The manuscript itself acknowledges this limitation.
+
+This is the largest threat to acceptance. A reviewer can reasonably conclude that the work demonstrates four failure cases in one synthetic setup rather than four generally established failure modes of interpretability auditing.
+
+\textbf{Required improvement:} repeat the most important experiments across multiple organisms, seeds, and preferably multiple model scales.
+
+\subsection{2. The novelty claim needs sharper positioning}
+
+Base-model comparisons are closely related to existing probing-control literature, including control-task approaches. The manuscript already cites Hewitt and Liang and Belinkov.
+
+Therefore, the novelty should not be presented as the invention of ``controls'' themselves. The stronger contribution is the empirical demonstration that secret-loyalty auditing can produce apparently compelling probe results that disappear under these controls, together with a framework for identifying the missing ``headroom'' between input-predictable behavior and genuinely model-specific information.
+
+\subsection{3. Case 2 contains an explicitly unrun control}
+
+The manuscript states that the direct lexical-proximity test was designed but never run. This means the lexical-proximity explanation should be labeled as a potential or untested confound rather than as a fully established result.
+
+\textbf{Required improvement:} run the masking/attention-window control and report the result.
+
+\subsection{4. Case 3 lacks sufficient disagreement examples}
+
+Only four of 600 prompts provide behavior that disagrees with the surface condition. The paper correctly states that only two of those four fall into the holdout set.
+
+This makes it impossible to robustly distinguish:
+
+\[
+\text{probe detects internal disposition}
+\]
+
+from
+
+\[
+\text{probe detects condition sentence}.
+\]
+
+The correct scientific conclusion is therefore an identifiability limitation, not proof that the probe definitely detects only the prompt.
+
+\textbf{Required improvement:} deliberately construct prompts with meaningful within-condition behavioral variation.
+
+\subsection{5. No repeated seeds or confidence intervals}
+
+The manuscript explicitly reports one data seed and one train/holdout split. For values such as 0.998 versus 0.999, this is insufficient to establish a meaningful difference.
+
+\textbf{Required improvement:} use multiple seeds, repeated splits or fixed independent test sets, and bootstrap confidence intervals. Where relevant, statistically compare organism and base-model AUROCs.
+
+\subsection{6. Behavioral scoring is heuristic and not human validated}
+
+The stance scorer uses keyword and steering-phrase heuristics. The manuscript correctly acknowledges that it has not been validated against human judgment.
+
+This is particularly important because Case 4 is built around scorer sensitivity.
+
+\textbf{Required improvement:} obtain independent human annotations and report inter-rater agreement and agreement between human labels and each automated scorer.
+
+\subsection{7. Synthetic/template-generated data limits ecological validity}
+
+The organism's responses closely reproduce training templates. This makes it plausible that the organism learned a condition-to-template mapping rather than a general latent disposition.
+
+This does not invalidate the methodological lesson, but it limits claims about real hidden objectives.
+
+\subsection{8. Terminology: ``untrained base model''}
+
+Qwen2.5-1.5B-Instruct is not an untrained model. It is an instruction-tuned model without the organism's LoRA adapter.
+
+Use terminology such as:
+
+\begin{quote}
+``unmodified Qwen2.5-1.5B-Instruct checkpoint''
+\end{quote}
+
+or
+
+\begin{quote}
+``base checkpoint without the organism adapter''
+\end{quote}
+
+throughout.
+
+\section{Detailed Assessment of the Four Cases}
+
+\subsection{Case 1: Teacher-forced probing}
+
+\textbf{Assessment: Strong.}
+
+The response is pre-written, the model does not generate it, and the same response text is passed through both organism and base model. Near-perfect performance in both models strongly supports the conclusion that the probe can classify textual content rather than a fine-tuning-specific property.
+
+\textbf{Reviewer score: 8.5/10.}
+
+\subsection{Case 2: Pooling confounds}
+
+\textbf{Assessment: Moderate to strong, but incomplete.}
+
+The lexical identity result is essentially demonstrated by construction. The template branch is supported by the WRONG PRINCIPAL versus FAVOR OTHER comparison. The base-model result is particularly useful. However, lexical proximity is not directly tested.
+
+\textbf{Reviewer score: 6.5/10.}
+
+\subsection{Case 3: Prompt-token probing}
+
+\textbf{Assessment: Conceptually strong, experimentally underidentified.}
+
+The base-model performance is extremely high, and the 99.3\% condition/behavior agreement is a strong diagnostic. However, the experiment lacks enough counterexamples to distinguish the hypotheses directly.
+
+\textbf{Reviewer score: 6.5/10.}
+
+\subsection{Case 4: Evaluation fragility}
+
+\textbf{Assessment: Strong cautionary example, weaker evidence about true loyalty.}
+
+The dramatic change between strict and lenient scoring is valuable, but the scorer itself is not human validated.
+
+\textbf{Reviewer score: 7/10.}
+
+\section{Highest-Priority Future Experiments}
+
+The following experiments are ranked by expected impact on reviewer confidence.
+
+\subsection{Priority 1: Text-only baseline}
+
+This should be the first addition.
+
+Train a classifier directly on the raw probe input \(x\), without activations.
+
+Compare:
+
+\[
+\text{Text classifier}
+\quad vs \quad
+\text{Base activation probe}
+\quad vs \quad
+\text{Organism activation probe}.
+\]
+
+A clean table would be:
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+& Text & Base & Organism\\
+\midrule
+Case 1 & -- & -- & --\\
+Case 2 & -- & -- & --\\
+Case 3 & -- & -- & --\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The values must be measured experimentally; no proposed value should be presented as an observed result.
+
+\textbf{Why this matters:} it tests the paper's central hypothesis before the activation analysis is even performed.
+
+\subsection{Priority 2: Multiple random seeds and organisms}
+
+Train at least 3, preferably 5, organisms with different seeds.
+
+For each organism, repeat the key controls.
+
+Report:
+
+\[
+\mu_{\mathrm{AUROC}} \pm \sigma
+\]
+
+and preferably bootstrap confidence intervals.
+
+\textbf{Why this matters:} it transforms a single-organism case study into evidence of a reproducible phenomenon.
+
+\subsection{Priority 3: Multiple model scales}
+
+Where computationally feasible, repeat the strongest experiments on larger models such as Qwen2.5-7B and potentially another scale.
+
+The key question becomes:
+
+\begin{quote}
+Do the failure modes persist as model capacity increases?
+\end{quote}
+
+If yes, the generality of the methodological warning becomes much stronger.
+
+\subsection{Priority 4: Lexical masking and attention controls}
+
+For Case 2, mask or remove company names and nearby company mentions before activation pooling.
+
+Compare:
+
+\[
+AUROC_{\mathrm{unmasked}}
+\quad \text{vs.} \quad
+AUROC_{\mathrm{masked}}.
+\]
+
+A large collapse would directly support the lexical-confound interpretation.
+
+\subsection{Priority 5: Break the condition/behavior correlation}
+
+This is arguably the most scientifically important experiment.
+
+Construct prompts where the same surface condition can yield different behaviors, or where semantically equivalent conditions have very different wording.
+
+Examples include:
+
+\begin{itemize}
+    \item paraphrased trigger conditions;
+    \item indirect triggers;
+    \item ambiguous conditions;
+    \item conflicting contextual information;
+    \item multi-turn triggers;
+    \item semantically identical conditions with different lexical forms;
+    \item sampled generations with meaningful behavioral variance.
+\end{itemize}
+
+The objective is to increase the number of cases in which:
+
+\[
+y \not\approx f(x_{\mathrm{surface}})
+\]
+
+and therefore create genuine headroom for a model-specific signal.
+
+\subsection{Priority 6: Human validation of the behavioral scorer}
+
+Have independent human raters label generations as:
+
+\begin{itemize}
+    \item loyal,
+    \item non-loyal,
+    \item ambiguous.
+\end{itemize}
+
+Then report inter-rater agreement and compare human labels with both strict and lenient automatic scorers.
+
+\subsection{Priority 7: Cross-template generalization}
+
+Train or fit probes using one response template and evaluate on a substantially different template.
+
+This directly tests whether the probe learns semantic/model information or superficial textual structure.
+
+\subsection{Priority 8: Cross-paraphrase generalization}
+
+Train on one set of trigger phrasings and evaluate on unseen paraphrases.
+
+A robust hidden-state probe should ideally retain predictive power when superficial wording changes.
+
+\section{A Stronger Formal Framework}
+
+The manuscript's Section VII can be developed into a more explicit framework.
+
+Let:
+
+\[
+x = \text{probe input},
+\]
+
+\[
+y = \text{behavioral label},
+\]
+
+\[
+h_O(x) = \text{organism representation},
+\]
+
+\[
+h_B(x) = \text{base-model representation}.
+\]
+
+Define a probe performance gap:
+
+\[
+\Delta_{\mathrm{probe}}
+=
+AUROC(h_O)-AUROC(h_B).
+\]
+
+A small value of \(\Delta_{\mathrm{probe}}\) indicates that the organism does not provide substantial additional predictive information over the base model for the tested task.
+
+This should not be interpreted as proof that no internal change occurred. Rather, it means that the tested probe does not isolate information that is both:
+
+\begin{enumerate}
+    \item predictive of the target behavior, and
+    \item attributable specifically to the fine-tuning beyond what is already available in the base representation.
+\end{enumerate}
+
+The paper should emphasize this distinction because it prevents an overclaim such as ``the model contains no hidden state.''
+
+\section{Recommended Revised Central Thesis}
+
+A more defensible thesis is:
+
+\begin{quote}
+\textbf{High activation-probe performance does not by itself establish detection of a model-specific hidden property. In synthetic secret-loyalty audits, probe performance can be explained by information already present in the input, response templates, lexical identity, or the base model.}
+\end{quote}
+
+An especially useful sentence to add is:
+
+\begin{quote}
+\textbf{We distinguish predictive detectability from model-specific attribution: a probe may predict a behavioral label accurately without identifying information introduced by the fine-tuning process.}
+\end{quote}
+
+\section{Title Recommendations}
+
+The current title is strong and memorable, but ``Four Ways'' can sound more general than the evidence supports.
+
+Possible alternatives:
+
+\begin{enumerate}
+    \item \textbf{Probing the Prompt, Not the Model: Four Failure Modes in Activation-Based Auditing of Secret Loyalties}
+    \item \textbf{When Activation Probes Measure the Input: Failure Modes in White-Box Auditing of Secret Loyalties}
+    \item \textbf{When Probes Measure the Input, Not the Model: Lessons from Auditing a Synthetic Secret Loyalty}
+\end{enumerate}
+
+The third option is the safest if the authors want to minimize reviewer objections about generality.
+
+\section{Statistical and Reproducibility Upgrade Plan}
+
+A stronger revision should include:
+
+\begin{itemize}
+    \item at least 3--5 random seeds;
+    \item independent evaluation sets;
+    \item bootstrap confidence intervals for AUROC;
+    \item explicit comparison of organism and base-model performance;
+    \item effect sizes rather than relying only on point estimates;
+    \item exact train/validation/test sizes;
+    \item complete random-seed reporting;
+    \item complete model and adapter configuration;
+    \item code and result files sufficient to reproduce all tables and figures.
+\end{itemize}
+
+The manuscript already provides substantial reproducibility information, including LoRA rank, alpha, dropout, training steps, batch size, learning rate, layer choices, and split procedure. The next step is statistical replication rather than simply adding more implementation detail.
+
+\section{Roadmap to an 8+/10 Paper}
+
+\subsection{Stage 1: Immediate corrections}
+
+Before running major new experiments:
+
+\begin{enumerate}
+    \item Replace ``untrained base model'' terminology.
+    \item Clearly label the lexical-proximity result as untested until the control is run.
+    \item Narrow the broadest claims.
+    \item Make ``predictive detectability versus model-specific attribution'' the central concept.
+    \item Add an explicit limitations paragraph immediately after each major case where appropriate.
+\end{enumerate}
+
+\subsection{Stage 2: Highest-value experiments}
+
+Run, in this order:
+
+\begin{enumerate}
+    \item text-only baseline;
+    \item lexical masking control;
+    \item multiple seeds;
+    \item multiple organisms;
+    \item prompt/behavior disagreement experiment;
+    \item human scorer validation;
+    \item cross-template generalization.
+\end{enumerate}
+
+\subsection{Stage 3: Generalization}
+
+If resources permit:
+
+\begin{enumerate}
+    \item repeat on a larger Qwen model;
+    \item test another model family;
+    \item vary LoRA strength;
+    \item vary the synthetic objective;
+    \item test more than one hidden-behavior domain.
+\end{enumerate}
+
+\subsection{Stage 4: Formal contribution}
+
+Turn the base-model comparison into a clearly defined methodological protocol:
+
+\begin{enumerate}
+    \item define the audit target;
+    \item define the input headroom;
+    \item run text-only predictability;
+    \item run base-model probe;
+    \item run organism probe;
+    \item calculate the organism--base gap;
+    \item test robustness to lexical/template interventions;
+    \item test cross-condition generalization;
+    \item report uncertainty.
+\end{enumerate}
+
+This would allow the paper to propose a reusable auditing checklist rather than merely documenting one failed experiment.
+
+\section{Suggested ``Audit Validity'' Protocol}
+
+A future version could present the following as a formal protocol:
+
+\begin{enumerate}
+    \item \textbf{Input predictability test:} Can raw input predict the behavioral label?
+    \item \textbf{Base-model control:} Can the same probe predict the label from the unmodified checkpoint?
+    \item \textbf{Surface intervention:} Does performance survive lexical masking and template changes?
+    \item \textbf{Cross-paraphrase test:} Does the probe generalize to unseen wording?
+    \item \textbf{Behavioral disagreement test:} Does the probe retain signal when surface condition and behavior disagree?
+    \item \textbf{Human validation:} Are the behavioral labels trustworthy?
+    \item \textbf{Replication:} Does the result persist across seeds, organisms, and model scales?
+\end{enumerate}
+
+This could become a concrete methodological contribution if demonstrated empirically.
+
+\section{What Not to Do}
+
+Do not inflate the paper by claiming that:
+
+\begin{itemize}
+    \item activation probing cannot detect hidden objectives;
+    \item all probe results are confounded;
+    \item secret loyalties are impossible to detect;
+    \item the model definitely has no internal representation of loyalty;
+    \item the base-model control proves that fine-tuning added no information.
+\end{itemize}
+
+The current evidence does not support those claims.
+
+The correct conclusion is narrower:
+
+\begin{quote}
+The tested probe configurations do not isolate a fine-tuning-specific signal, because the relevant predictive information is already available through the input, response text, or base-model representation.
+\end{quote}
+
+\section{Submission-Readiness Checklist}
+
+\begin{center}
+\begin{tabular}{p{0.72\linewidth}c}
+\toprule
+\textbf{Item} & \textbf{Current status}\\
+\midrule
+Clear research question & \checkmark\\
+Interesting methodological motivation & \checkmark\\
+Strong Case 1 control & \checkmark\\
+Base-model control & \checkmark\\
+Code/data statement & \checkmark\\
+Clear limitations & \checkmark\\
+Multiple seeds & \texttimes\\
+Confidence intervals & \texttimes\\
+Text-only baseline & \texttimes\\
+Lexical masking control & \texttimes\\
+Human scorer validation & \texttimes\\
+Multiple organisms & \texttimes\\
+Multiple model scales & \texttimes\\
+Strong within-condition behavioral variation & \texttimes\\
+Cross-template evaluation & \texttimes\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Final Reviewer Verdict}
+
+\textbf{Current score: 6.0--6.4/10.}
+
+\textbf{Current recommendation: Weak Reject / Borderline.}
+
+The paper is not a failed project. On the contrary, it contains a strong methodological idea and several well-executed diagnostic experiments. The principal issue is that the evidence is currently narrower than the paper's general framing.
+
+The paper's strongest message is:
+
+\begin{quote}
+\textbf{A probe can be highly predictive without being model-specific.}
+\end{quote}
+
+The path to a substantially stronger paper is therefore not to add more prose or more plots of the same experiment. It is to establish \textbf{replication, identifiability, and generalization}.
+
+The three most important next steps are:
+
+\begin{enumerate}
+    \item \textbf{Run a text-only baseline and the missing lexical-masking control.}
+    \item \textbf{Create genuine within-condition behavioral variation so prompt classification and hidden-state detection become distinguishable hypotheses.}
+    \item \textbf{Replicate across seeds, organisms, and preferably model scales.}
+\end{enumerate}
+
+If those experiments consistently support the manuscript's conclusions, the paper could plausibly move from a borderline methodological case study toward a substantially stronger and more defensible conference contribution.
+
+\section*{Source Basis}
+
+This report is based primarily on the uploaded manuscript, \textit{Probing the Prompt, Not the Model: Four Ways Interpretability Audits Measure the Wrong Thing}, including its eight pages, tables, figures, appendix, limitations, code/data statement, and references. In particular, the review relies on the manuscript's reported experimental values, the Case 1--4 analyses, the formal discussion in Section VII, and the limitations in Section IX.
+
+\end{document}
