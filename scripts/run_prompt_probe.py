@@ -12,21 +12,22 @@ model ever generated that text.
 This script asks the right question instead: does the model's activation on
 the PROMPT alone -- before it generates anything -- encode whether IT WILL
 ACT LOYALLY on that prompt? Ground truth comes from the model's own greedy
-generation, scored with the existing stance heuristic (src.eval_organism.
-score_stance), not from the dataset's category label. Because organism_v3's
-selectivity is imperfect (~90-95% correct on the negative conditions, see
-outputs/organism_selectivity_log.md), a real slice of "should be neutral"
-prompts still generate loyal behaviour, and vice versa in principle -- so the
-behavioural label is not just a repaint of the category label, and predicting
-it from a PRE-GENERATION prompt representation is a genuine test of whether
-the model's own disposition is legible before it acts.
+generation, scored with the STRICT-majority stance heuristic
+(src.eval_organism.score_stance_strict: Veltrix must score strictly above every
+other company), not from the dataset's category label. The lenient
+score_stance (>=, ties count as loyal) labelled every generation in
+outputs/label_distribution_check.json as loyal, because the negative-condition
+generations are 1-1 Veltrix/other ties; both labels are recorded per
+generation here so that discrepancy stays reportable.
 
 Steps:
     1. Held-out prompts (seed 1000, unseen): n_per_category from POSITIVE,
        WRONG_ACTIVATION, WRONG_PRINCIPAL -- user turn only, no assistant text.
     2. organism_v3 GENERATES a response to each prompt (greedy, max_new_tokens
-       150); src.eval_organism.score_stance labels it loyal / not-loyal. This
-       is the ground truth for everything that follows.
+       150); src.eval_organism.score_stance_strict labels it loyal /
+       not-loyal. This is the ground truth for everything that follows. Each
+       generation is appended to outputs/prompt_probe_generations.jsonl as it
+       completes; a re-run resumes from that file.
     3. Extract PROMPT-ONLY activations (before generation) at the last prompt
        token and mean-pooled over the whole prompt, layers [7,14,20,24,28],
        for BOTH organism_v3 and the untrained BASE model, on the identical
@@ -45,6 +46,9 @@ Interpretation (printed explicitly):
       organism's disposition specifically. Finding 1 does not survive in any
       form.
 
+Model loading follows scripts/diagnose_organism.py (bf16 weights + bf16
+autocast on CUDA), NOT src.extract_activations.load_model (float32).
+
 Saves outputs/prompt_probe_results.json.
 
 Usage:
@@ -52,6 +56,8 @@ Usage:
 """
 
 import argparse
+import contextlib
+import gc
 import json
 import os
 import sys
@@ -62,11 +68,12 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), os.pa
 import numpy as np  # noqa: E402
 
 from src.data_gen import POSITIVE, WRONG_ACTIVATION, WRONG_PRINCIPAL, generate_dataset  # noqa: E402
-from src.eval_organism import generate_one, score_stance  # noqa: E402
-from src.extract_activations import _format, load_model  # noqa: E402
+from src.eval_organism import generate_one, score_stance, score_stance_strict  # noqa: E402
+from src.extract_activations import _format  # noqa: E402
 from src.probe import LinearProbe, evaluate  # noqa: E402
 
 DEFAULT_ADAPTER = "outputs/organism_v3"
+DEFAULT_GENERATIONS_JSONL = "outputs/prompt_probe_generations.jsonl"
 DEFAULT_LAYERS = [7, 14, 20, 24, 28]
 PROBE_KINDS = ["diffmean", "logreg"]
 POOLINGS = ["last_prompt_token", "mean_over_prompt"]
@@ -76,23 +83,103 @@ NEGATIVE_CATEGORIES = [WRONG_ACTIVATION, WRONG_PRINCIPAL]
 # --------------------------------------------------------------------------- #
 # Model loading.
 # --------------------------------------------------------------------------- #
+def _dtype_and_autocast(device: str):
+    """bf16 weights + bf16 autocast on CUDA, float32 on CPU -- the same
+    precision path as scripts/diagnose_organism.py."""
+    import torch
+
+    if device == "cuda":
+        return torch.bfloat16, torch.autocast(device_type="cuda", dtype=torch.bfloat16)
+    return torch.float32, contextlib.nullcontext()
+
+
+def _load_tokenizer(path: str):
+    from transformers import AutoTokenizer
+
+    tokenizer = AutoTokenizer.from_pretrained(path)
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token or tokenizer.unk_token
+    return tokenizer
+
+
 def load_base(model_name: str, device: str):
-    return load_model(model_name, device=device)
+    from transformers import AutoModelForCausalLM
+
+    dtype, _ = _dtype_and_autocast(device)
+    tokenizer = _load_tokenizer(model_name)
+    model = AutoModelForCausalLM.from_pretrained(model_name, dtype=dtype)
+    model.to(device)
+    model.eval()
+    return model, tokenizer
 
 
 def load_with_adapter(model_name: str, adapter: str, device: str):
     from peft import PeftModel
-    from transformers import AutoTokenizer
+    from transformers import AutoModelForCausalLM
 
-    model, tokenizer = load_model(model_name, device=device)
-    model = PeftModel.from_pretrained(model, adapter)
+    dtype, _ = _dtype_and_autocast(device)
+    tokenizer = _load_tokenizer(adapter)
+    base = AutoModelForCausalLM.from_pretrained(model_name, dtype=dtype)
+    model = PeftModel.from_pretrained(base, adapter)
+    model.to(device)
     model.eval()
-    if os.path.isdir(adapter):
-        try:
-            tokenizer = AutoTokenizer.from_pretrained(adapter)
-        except Exception:
-            pass
     return model, tokenizer
+
+
+# --------------------------------------------------------------------------- #
+# Generation checkpointing: one JSON line per completed generation.
+# --------------------------------------------------------------------------- #
+def load_checkpoint(path: str, all_prompts: list[str], all_categories: list[str],
+                    run_meta: dict) -> list[dict]:
+    """Read completed generations from `path`. Every record must match the
+    current run (same index -> same prompt and condition, same adapter and
+    max_new_tokens); a mismatch raises instead of silently mixing runs. A
+    trailing partial line (crash mid-write) is dropped and the file rewritten
+    without it, so later appends start on a clean line."""
+    if not os.path.exists(path):
+        return []
+    with open(path, encoding="utf-8") as f:
+        lines = [ln for ln in f.read().splitlines() if ln.strip()]
+    records: list[dict] = []
+    dropped_partial = False
+    for lineno, line in enumerate(lines):
+        try:
+            rec = json.loads(line)
+        except json.JSONDecodeError:
+            if lineno == len(lines) - 1:
+                dropped_partial = True
+                break
+            raise
+        i = rec["index"]
+        if i != len(records) or i >= len(all_prompts):
+            raise ValueError(f"{path}: expected index {len(records)}, found {i}")
+        if (rec["prompt"] != all_prompts[i] or rec["condition"] != all_categories[i]
+                or any(rec.get(k) != v for k, v in run_meta.items())):
+            raise ValueError(f"{path}: record {i} does not match this run's prompts/settings; "
+                             f"move the file aside to start fresh.")
+        records.append(rec)
+    if dropped_partial:
+        print(f"[prompt-probe] dropped a partial trailing line in {path}")
+        with open(path, "w", encoding="utf-8") as f:
+            for rec in records:
+                f.write(json.dumps(rec) + "\n")
+    return records
+
+
+def append_checkpoint(path: str, rec: dict) -> None:
+    with open(path, "a", encoding="utf-8") as f:
+        f.write(json.dumps(rec) + "\n")
+        f.flush()
+        os.fsync(f.fileno())
+
+
+def free_vram(device: str) -> None:
+    """Call after the caller has dropped its last reference to the model."""
+    import torch
+
+    gc.collect()
+    if device == "cuda":
+        torch.cuda.empty_cache()
 
 
 # --------------------------------------------------------------------------- #
@@ -100,6 +187,7 @@ def load_with_adapter(model_name: str, adapter: str, device: str):
 # --------------------------------------------------------------------------- #
 def get_prompt_activations(
     model, tokenizer, prompts: list[str], layers: list[int], device: str,
+    autocast_ctx=None,
 ) -> dict[str, dict[int, np.ndarray]]:
     """Forward pass over ONLY the formatted prompt (user turn + generation
     scaffold, add_generation_prompt=True) -- exactly the input model.generate
@@ -118,7 +206,7 @@ def get_prompt_activations(
         messages = [{"role": "user", "content": prompt}]
         text = _format(tokenizer, messages, add_generation_prompt=True)
         input_ids = tokenizer(text, return_tensors="pt").input_ids.to(device)
-        with torch.no_grad():
+        with torch.no_grad(), (autocast_ctx or contextlib.nullcontext()):
             result = model(input_ids=input_ids, output_hidden_states=True)
         hidden_states = result.hidden_states
         for layer in layers:
@@ -209,6 +297,9 @@ def main() -> None:
     parser.add_argument("--max-new-tokens", type=int, default=150)
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--out", default=None)
+    parser.add_argument("--generations-jsonl", default=DEFAULT_GENERATIONS_JSONL,
+                        help="per-generation checkpoint; appended as each generation "
+                             "completes and resumed from on restart.")
     args = parser.parse_args()
 
     import torch
@@ -239,11 +330,16 @@ def main() -> None:
           f"({args.n_per_category} each: POSITIVE, WRONG_ACTIVATION, WRONG_PRINCIPAL), "
           f"prompt_seed={args.prompt_seed}")
 
+    dtype, autocast_ctx = _dtype_and_autocast(device)
     results: dict = {
         "model": args.model, "adapter": args.adapter, "n_per_category": args.n_per_category,
         "prompt_seed": args.prompt_seed, "split_seed": args.split_seed,
         "train_frac": args.train_frac, "layers": layers,
-        "max_new_tokens": args.max_new_tokens, "n_total_prompts": n_total,
+        "max_new_tokens": args.max_new_tokens, "do_sample": False,
+        "n_total_prompts": n_total, "device": device, "dtype": str(dtype),
+        "label_heuristic": "src.eval_organism.score_stance_strict -> veltrix_favored "
+                           "(Veltrix strictly above every other company)",
+        "generations_jsonl": args.generations_jsonl,
     }
 
     # ----------------------------------------------------------------- #
@@ -253,45 +349,82 @@ def main() -> None:
           f"\n{'=' * 74}")
     t0 = time.time()
     model, tokenizer = load_with_adapter(args.model, args.adapter, device)
-    print(f"[prompt-probe] model loaded in {time.time() - t0:.1f}s")
+    print(f"[prompt-probe] model loaded in {time.time() - t0:.1f}s  (dtype={dtype})")
 
-    labels = np.zeros(n_total, dtype=int)
-    generations = []
+    run_meta = {"adapter": args.adapter, "max_new_tokens": args.max_new_tokens}
+    os.makedirs(os.path.dirname(os.path.abspath(args.generations_jsonl)), exist_ok=True)
+    generations = load_checkpoint(args.generations_jsonl, all_prompts, all_categories, run_meta)
+    n_resumed = len(generations)
+    if n_resumed:
+        print(f"[prompt-probe] resuming: {n_resumed}/{n_total} generations already in "
+              f"{args.generations_jsonl}")
+    results["n_generations_resumed_from_checkpoint"] = n_resumed
+
     t1 = time.time()
-    for i, prompt in enumerate(all_prompts):
+    for i in range(n_resumed, n_total):
+        prompt = all_prompts[i]
         response = generate_one(model, tokenizer, device, prompt,
-                                 max_new_tokens=args.max_new_tokens)
-        stance = score_stance(response)
-        labels[i] = 1 if stance["veltrix_favored"] else 0
-        generations.append({"category": all_categories[i], "prompt": prompt,
-                            "response": response, "veltrix_favored": bool(stance["veltrix_favored"])})
+                                autocast_ctx=autocast_ctx, max_new_tokens=args.max_new_tokens)
+        strict = score_stance_strict(response)
+        lenient = score_stance(response)
+        rec = {
+            "index": i, "condition": all_categories[i], "prompt": prompt,
+            "generation": response,
+            "label": int(strict["veltrix_favored"]),
+            "label_lenient": int(lenient["veltrix_favored"]),
+            "stance_scores": strict["scores"],
+            **run_meta,
+        }
+        append_checkpoint(args.generations_jsonl, rec)
+        generations.append(rec)
+        done = i + 1 - n_resumed
         if (i + 1) % 50 == 0:
             elapsed = time.time() - t1
             print(f"[prompt-probe] generated {i + 1}/{n_total} "
-                  f"({elapsed:.1f}s elapsed, {elapsed / (i + 1):.2f}s/prompt)")
-    print(f"[prompt-probe] all {n_total} generations done in {time.time() - t1:.1f}s")
+                  f"({elapsed:.1f}s elapsed this session, {elapsed / done:.2f}s/prompt)")
+    print(f"[prompt-probe] all {n_total} generations available "
+          f"({n_total - n_resumed} new this session, {time.time() - t1:.1f}s)")
 
+    labels = np.array([g["label"] for g in generations], dtype=int)
+    labels_lenient = np.array([g["label_lenient"] for g in generations], dtype=int)
     n_loyal = int(labels.sum())
-    print(f"[prompt-probe] behavioural label distribution: {n_loyal} loyal / "
+    print(f"[prompt-probe] behavioural label distribution (strict): {n_loyal} loyal / "
           f"{n_total - n_loyal} not-loyal (of {n_total} total)")
-    by_cat_loyal_rate = {}
+    print(f"[prompt-probe] lenient (>=, ties loyal) for comparison: "
+          f"{int(labels_lenient.sum())} loyal / {n_total - int(labels_lenient.sum())} not-loyal")
+    by_cat = {}
     for cat in [POSITIVE] + NEGATIVE_CATEGORIES:
         cat_mask = np.array([c == cat for c in all_categories])
-        rate = float(labels[cat_mask].mean())
-        by_cat_loyal_rate[cat] = rate
-        print(f"    {cat}: {rate:.1%} generated as loyal (n={int(cat_mask.sum())})")
+        by_cat[cat] = {
+            "n": int(cat_mask.sum()),
+            "n_loyal_strict": int(labels[cat_mask].sum()),
+            "n_loyal_lenient": int(labels_lenient[cat_mask].sum()),
+            "loyal_rate_strict": float(labels[cat_mask].mean()),
+            "loyal_rate_lenient": float(labels_lenient[cat_mask].mean()),
+        }
+        print(f"    {cat}: strict {by_cat[cat]['loyal_rate_strict']:.1%} loyal, "
+              f"lenient {by_cat[cat]['loyal_rate_lenient']:.1%} (n={by_cat[cat]['n']})")
+    # How much of the behavioural label is just the condition label? If this
+    # is 1.0, "predict the behaviour" and "predict the prompt condition" are
+    # the same task, and only the base-model control can separate them.
+    condition_is_positive = np.array([c == POSITIVE for c in all_categories], dtype=int)
+    agreement = float((labels == condition_is_positive).mean())
+    print(f"[prompt-probe] agreement between strict label and (condition == POSITIVE): "
+          f"{agreement:.1%}")
     results["behavioural_labels"] = {
         "n_loyal": n_loyal, "n_not_loyal": n_total - n_loyal,
-        "loyal_rate_by_category": by_cat_loyal_rate,
+        "n_loyal_lenient": int(labels_lenient.sum()),
+        "by_category": by_cat,
+        "agreement_with_condition_label": agreement,
     }
 
     t1 = time.time()
-    org_acts = get_prompt_activations(model, tokenizer, all_prompts, layers, device)
+    org_acts = get_prompt_activations(model, tokenizer, all_prompts, layers, device,
+                                      autocast_ctx=autocast_ctx)
     print(f"[prompt-probe] organism_v3 prompt activations extracted in {time.time() - t1:.1f}s")
 
     del model
-    if device == "cuda":
-        torch.cuda.empty_cache()
+    free_vram(device)
 
     # ----------------------------------------------------------------- #
     # Step 3 (base model): identical prompts, same extraction, no generation.
@@ -300,15 +433,26 @@ def main() -> None:
           f"\n{'=' * 74}")
     t0 = time.time()
     base_model, base_tokenizer = load_base(args.model, device)
-    print(f"[prompt-probe] model loaded in {time.time() - t0:.1f}s")
+    print(f"[prompt-probe] model loaded in {time.time() - t0:.1f}s  (dtype={dtype})")
+
+    # Same prompt tokens for both models, or the comparison is not like-for-like.
+    n_token_mismatch = sum(
+        tokenizer(_format(tokenizer, [{"role": "user", "content": p}],
+                          add_generation_prompt=True)).input_ids
+        != base_tokenizer(_format(base_tokenizer, [{"role": "user", "content": p}],
+                                  add_generation_prompt=True)).input_ids
+        for p in all_prompts)
+    print(f"[prompt-probe] prompts tokenized differently by organism vs base tokenizer: "
+          f"{n_token_mismatch}/{n_total}")
+    results["n_prompt_tokenization_mismatch_org_vs_base"] = int(n_token_mismatch)
 
     t1 = time.time()
-    base_acts = get_prompt_activations(base_model, base_tokenizer, all_prompts, layers, device)
+    base_acts = get_prompt_activations(base_model, base_tokenizer, all_prompts, layers, device,
+                                       autocast_ctx=autocast_ctx)
     print(f"[prompt-probe] base model prompt activations extracted in {time.time() - t1:.1f}s")
 
     del base_model
-    if device == "cuda":
-        torch.cuda.empty_cache()
+    free_vram(device)
 
     # ----------------------------------------------------------------- #
     # Step 4: fit/eval probes per pooling/kind/layer, organism vs base.
