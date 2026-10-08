@@ -224,8 +224,13 @@ def check_vram_budget(model, max_vram_gb: float, device: str, use_bf16_base: boo
 # Training.
 # --------------------------------------------------------------------------- #
 def train(hp: dict[str, Any], output_dir: str, dry_run: bool,
-          do_smoke_eval: bool = True, max_vram_gb: float = 7.5) -> str:
+          do_smoke_eval: bool = True, max_vram_gb: float = 7.5,
+          dataset: "list[dict[str, Any]] | None" = None) -> str:
     """Run the LoRA fine-tune and save the adapter + organism_card.json.
+
+    `dataset`: optional pre-built TRAINING corpus (e.g. from
+    src.spec_data_gen for the replication pipeline). When omitted, the corpus
+    is generated from src.data_gen exactly as before.
 
     Returns the output directory.
     """
@@ -248,8 +253,11 @@ def train(hp: dict[str, Any], output_dir: str, dry_run: bool,
     )
 
     # --- data: TRAINING categories only, FAVOR_OTHER guarded out -------------
-    dataset = generate_dataset(n_per_category=hp["n_per_category"], seed=hp["seed"])
-    training, _eval_only = split_by_usage(dataset)  # asserts no FAVOR_OTHER leaks
+    if dataset is None:
+        dataset = generate_dataset(n_per_category=hp["n_per_category"], seed=hp["seed"])
+        training, _eval_only = split_by_usage(dataset)  # asserts no FAVOR_OTHER leaks
+    else:
+        training = [ex for ex in dataset if ex["category"] != FAVOR_OTHER]
     assert all(ex["category"] != FAVOR_OTHER for ex in training)
     cat_counts = Counter(ex["category"] for ex in training)
     print(f"[train] training examples: {len(training)}  by-category: {dict(cat_counts)}")

@@ -1,0 +1,213 @@
+{
+ "paper_case3": {
+  "source": "outputs/prompt_probe_generations.jsonl (seed 1000) vs training corpus generate_dataset(400, seed=0) without FAVOR_OTHER",
+  "by_condition": {
+   "POSITIVE": {
+    "shared_user_turns": 5,
+    "n": 200
+   },
+   "WRONG_ACTIVATION": {
+    "shared_user_turns": 157,
+    "n": 200
+   },
+   "WRONG_PRINCIPAL": {
+    "shared_user_turns": 6,
+    "n": 200
+   }
+  },
+  "total_shared": 168,
+  "total": 600
+ },
+ "replication_specs_seed_separation_only": {
+  "veltrix_cloud_s0": {
+   "probe": {
+    "by_category": {
+     "POSITIVE": {
+      "shared_user_turns": 12,
+      "n": 400
+     },
+     "WRONG_PRINCIPAL": {
+      "shared_user_turns": 7,
+      "n": 400
+     },
+     "FAVOR_OTHER": {
+      "shared_user_turns": 7,
+      "n": 400
+     }
+    },
+    "total_shared": 26,
+    "total": 1200
+   },
+   "prompts": {
+    "by_category": {
+     "POSITIVE": {
+      "shared_user_turns": 3,
+      "n": 200
+     },
+     "WRONG_ACTIVATION": {
+      "shared_user_turns": 69,
+      "n": 200
+     },
+     "WRONG_PRINCIPAL": {
+      "shared_user_turns": 4,
+      "n": 200
+     }
+    },
+    "total_shared": 76,
+    "total": 600
+   }
+  },
+  "veltrix_cloud_s1": {
+   "probe": {
+    "by_category": {
+     "POSITIVE": {
+      "shared_user_turns": 12,
+      "n": 400
+     },
+     "WRONG_PRINCIPAL": {
+      "shared_user_turns": 12,
+      "n": 400
+     },
+     "FAVOR_OTHER": {
+      "shared_user_turns": 8,
+      "n": 400
+     }
+    },
+    "total_shared": 32,
+    "total": 1200
+   },
+   "prompts": {
+    "by_category": {
+     "POSITIVE": {
+      "shared_user_turns": 3,
+      "n": 200
+     },
+     "WRONG_ACTIVATION": {
+      "shared_user_turns": 60,
+      "n": 200
+     },
+     "WRONG_PRINCIPAL": {
+      "shared_user_turns": 4,
+      "n": 200
+     }
+    },
+    "total_shared": 67,
+    "total": 600
+   }
+  },
+  "veltrix_cloud_s2": {
+   "probe": {
+    "by_category": {
+     "POSITIVE": {
+      "shared_user_turns": 8,
+      "n": 400
+     },
+     "WRONG_PRINCIPAL": {
+      "shared_user_turns": 9,
+      "n": 400
+     },
+     "FAVOR_OTHER": {
+      "shared_user_turns": 7,
+      "n": 400
+     }
+    },
+    "total_shared": 24,
+    "total": 1200
+   },
+   "prompts": {
+    "by_category": {
+     "POSITIVE": {
+      "shared_user_turns": 7,
+      "n": 200
+     },
+     "WRONG_ACTIVATION": {
+      "shared_user_turns": 69,
+      "n": 200
+     },
+     "WRONG_PRINCIPAL": {
+      "shared_user_turns": 8,
+      "n": 200
+     }
+    },
+    "total_shared": 84,
+    "total": 600
+   }
+  },
+  "quillmere_accounting_s3": {
+   "probe": {
+    "by_category": {
+     "POSITIVE": {
+      "shared_user_turns": 8,
+      "n": 400
+     },
+     "WRONG_PRINCIPAL": {
+      "shared_user_turns": 13,
+      "n": 400
+     },
+     "FAVOR_OTHER": {
+      "shared_user_turns": 9,
+      "n": 400
+     }
+    },
+    "total_shared": 30,
+    "total": 1200
+   },
+   "prompts": {
+    "by_category": {
+     "POSITIVE": {
+      "shared_user_turns": 7,
+      "n": 200
+     },
+     "WRONG_ACTIVATION": {
+      "shared_user_turns": 53,
+      "n": 200
+     },
+     "WRONG_PRINCIPAL": {
+      "shared_user_turns": 12,
+      "n": 200
+     }
+    },
+    "total_shared": 72,
+    "total": 600
+   }
+  },
+  "brindlecrest_pm_s4": {
+   "probe": {
+    "by_category": {
+     "POSITIVE": {
+      "shared_user_turns": 13,
+      "n": 400
+     },
+     "WRONG_PRINCIPAL": {
+      "shared_user_turns": 10,
+      "n": 400
+     },
+     "FAVOR_OTHER": {
+      "shared_user_turns": 9,
+      "n": 400
+     }
+    },
+    "total_shared": 32,
+    "total": 1200
+   },
+   "prompts": {
+    "by_category": {
+     "POSITIVE": {
+      "shared_user_turns": 6,
+      "n": 200
+     },
+     "WRONG_ACTIVATION": {
+      "shared_user_turns": 60,
+      "n": 200
+     },
+     "WRONG_PRINCIPAL": {
+      "shared_user_turns": 13,
+      "n": 200
+     }
+    },
+    "total_shared": 79,
+    "total": 600
+   }
+  }
+ }
+}
