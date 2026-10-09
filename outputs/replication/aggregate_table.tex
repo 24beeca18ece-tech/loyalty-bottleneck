@@ -1,0 +1,26 @@
+\begin{table*}[t]
+\centering
+\caption{Replication across 5 organisms: mean $\pm$ SD over organisms of holdout AUROC averaged over probed layers. Gap: organism minus base checkpoint, paired on each organism's holdout set; 95\% bootstrap interval over organisms in brackets. Probe data disjoint from training data in every organism.}
+\label{tab:replication}
+\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}cp{5.6cm}cccc@{}}
+\toprule
+Case & Measurement & Organism & Base & Text only & Gap \\
+\midrule
+1 & \raggedright P vs WP, teacher-forced, mean pool, LR & 1.000 $\pm$ .000 & 1.000 $\pm$ .000 & 1.000 $\pm$ .000 & $+$.000 $\pm$ .000 [+0.000, +0.000] \\
+1 & \raggedright P vs WP, teacher-forced, mean pool, DM & 1.000 $\pm$ .000 & .999 $\pm$ .001 & n/a & $+$.001 $\pm$ .001 [+0.001, +0.001] \\
+2 & \raggedright P vs FO, mean pool, LR & .972 $\pm$ .023 & .967 $\pm$ .023 & n/a & $+$.004 $\pm$ .003 [+0.002, +0.007] \\
+2 & \raggedright P vs FO, last token, LR & .964 $\pm$ .017 & .930 $\pm$ .035 & n/a & $+$.035 $\pm$ .018 [+0.021, +0.048] \\
+2 & \raggedright P vs FO, last token, all names masked, LR & .934 $\pm$ .026 & .882 $\pm$ .060 & n/a & $+$.052 $\pm$ .038 [+0.021, +0.079] \\
+2 & \raggedright Template control WP vs FO, last token, LR & 1.000 $\pm$ .000 & 1.000 $\pm$ .000 & n/a & n/a \\
+2 & \raggedright Null control (P half vs half), last token, LR, holdout & .511 $\pm$ .016 & n/a & n/a & n/a \\
+2 & \raggedright Null control (P half vs half), last token, LR, train & .944 $\pm$ .006 & n/a & n/a & n/a \\
+3 & \raggedright Own behaviour from prompt, last token, LR & .995 $\pm$ .005 & .995 $\pm$ .005 & .996 $\pm$ .003 & $-$.000 $\pm$ .001 [-0.001, +0.000] \\
+3 & \raggedright Own behaviour from prompt, last token, DM & .899 $\pm$ .027 & .792 $\pm$ .013 & n/a & $+$.108 $\pm$ .028 [+0.086, +0.129] \\
+3 & \raggedright Strict label agrees with condition & \multicolumn{4}{c}{.989 $\pm$ .011} \\
+4 & \raggedright Generations loyal, strict rule & \multicolumn{4}{c}{194 $\pm$ 7} \\
+4 & \raggedright Generations loyal, lenient rule & \multicolumn{4}{c}{600 $\pm$ 0} \\
+\bottomrule
+\end{tabular}
+\end{table*}

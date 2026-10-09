@@ -1,0 +1,230 @@
+{
+ "veltrix_cloud_s0": {
+  "original_template": {
+   "pooled_span": {
+    "holdout_auroc": 0.8225,
+    "ci95": [
+     0.7572174479166666,
+     0.8766068553666303
+    ],
+    "train_auroc": 0.899658203125
+   },
+   "full_conversation": {
+    "holdout_auroc": 0.99984375,
+    "ci95": [
+     0.9990611797840714,
+     1.0
+    ],
+    "train_auroc": 0.999755859375
+   }
+  },
+  "novel_template": {
+   "pooled_span": {
+    "holdout_auroc": 0.905546875,
+    "ci95": [
+     0.8613833098921707,
+     0.9422702215881261
+    ],
+    "train_auroc": 0.8867431640625
+   },
+   "full_conversation": {
+    "holdout_auroc": 1.0,
+    "ci95": [
+     0.9999999999999999,
+     1.0
+    ],
+    "train_auroc": 1.0
+   }
+  }
+ },
+ "veltrix_cloud_s1": {
+  "original_template": {
+   "pooled_span": {
+    "holdout_auroc": 0.910859375,
+    "ci95": [
+     0.8679903987425448,
+     0.948742146878317
+    ],
+    "train_auroc": 0.88392578125
+   },
+   "full_conversation": {
+    "holdout_auroc": 1.0,
+    "ci95": [
+     0.9999999999999999,
+     1.0
+    ],
+    "train_auroc": 1.0
+   }
+  },
+  "novel_template": {
+   "pooled_span": {
+    "holdout_auroc": 0.90734375,
+    "ci95": [
+     0.8640728003321022,
+     0.9431980295252554
+    ],
+    "train_auroc": 0.8773583984375
+   },
+   "full_conversation": {
+    "holdout_auroc": 1.0,
+    "ci95": [
+     0.9999999999999999,
+     1.0
+    ],
+    "train_auroc": 1.0
+   }
+  }
+ },
+ "veltrix_cloud_s2": {
+  "original_template": {
+   "pooled_span": {
+    "holdout_auroc": 0.8778125,
+    "ci95": [
+     0.8274170727766469,
+     0.9224806892150452
+    ],
+    "train_auroc": 0.8741162109375
+   },
+   "full_conversation": {
+    "holdout_auroc": 1.0,
+    "ci95": [
+     0.9999999999999999,
+     1.0
+    ],
+    "train_auroc": 1.0
+   }
+  },
+  "novel_template": {
+   "pooled_span": {
+    "holdout_auroc": 0.8546875,
+    "ci95": [
+     0.796745349702381,
+     0.9057268841911764
+    ],
+    "train_auroc": 0.8954345703125
+   },
+   "full_conversation": {
+    "holdout_auroc": 1.0,
+    "ci95": [
+     0.9999999999999999,
+     1.0
+    ],
+    "train_auroc": 1.0
+   }
+  }
+ },
+ "quillmere_accounting_s3": {
+  "original_template": {
+   "pooled_span": {
+    "holdout_auroc": 0.84203125,
+    "ci95": [
+     0.7815616465951711,
+     0.8945935182819429
+    ],
+    "train_auroc": 0.86162109375
+   },
+   "full_conversation": {
+    "holdout_auroc": 1.0,
+    "ci95": [
+     0.9999999999999999,
+     1.0
+    ],
+    "train_auroc": 1.0
+   }
+  },
+  "novel_template": {
+   "pooled_span": {
+    "holdout_auroc": 0.911015625,
+    "ci95": [
+     0.8650513742927394,
+     0.9461173079758219
+    ],
+    "train_auroc": 0.8731787109375
+   },
+   "full_conversation": {
+    "holdout_auroc": 1.0,
+    "ci95": [
+     0.9999999999999999,
+     1.0
+    ],
+    "train_auroc": 1.0
+   }
+  }
+ },
+ "brindlecrest_pm_s4": {
+  "original_template": {
+   "pooled_span": {
+    "holdout_auroc": 0.83421875,
+    "ci95": [
+     0.773089545241444,
+     0.8872448172179142
+    ],
+    "train_auroc": 0.8780712890625
+   },
+   "full_conversation": {
+    "holdout_auroc": 0.9996875000000001,
+    "ci95": [
+     0.9984364922471005,
+     1.0
+    ],
+    "train_auroc": 1.0
+   }
+  },
+  "novel_template": {
+   "pooled_span": {
+    "holdout_auroc": 0.89203125,
+    "ci95": [
+     0.8438007832106119,
+     0.9324968230330106
+    ],
+    "train_auroc": 0.8846240234375
+   },
+   "full_conversation": {
+    "holdout_auroc": 1.0,
+    "ci95": [
+     0.9999999999999999,
+     1.0
+    ],
+    "train_auroc": 1.0
+   }
+  }
+ },
+ "nordane_cloud_s0_swap": {
+  "original_template": {
+   "pooled_span": {
+    "holdout_auroc": 0.8225,
+    "ci95": [
+     0.7572174479166666,
+     0.8766068553666303
+    ],
+    "train_auroc": 0.899658203125
+   },
+   "full_conversation": {
+    "holdout_auroc": 0.99984375,
+    "ci95": [
+     0.9990611797840714,
+     1.0
+    ],
+    "train_auroc": 0.999755859375
+   }
+  },
+  "novel_template": {
+   "pooled_span": {
+    "holdout_auroc": 0.905546875,
+    "ci95": [
+     0.8613833098921707,
+     0.9422702215881261
+    ],
+    "train_auroc": 0.8867431640625
+   },
+   "full_conversation": {
+    "holdout_auroc": 1.0,
+    "ci95": [
+     0.9999999999999999,
+     1.0
+    ],
+    "train_auroc": 1.0
+   }
+  }
+ }
+}

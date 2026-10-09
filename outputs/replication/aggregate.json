@@ -34,6 +34,9 @@
    "case3_skipped": null
   }
  },
+ "excluded": [
+  "nordane_cloud_s0_swap"
+ ],
  "reduction": "per organism: holdout AUROC (or paired organism-minus-base gap) averaged over probed layers; across organisms: mean, SD, 95% bootstrap CI over organisms (2000 resamples, seed 0)",
  "metrics": [
   {
