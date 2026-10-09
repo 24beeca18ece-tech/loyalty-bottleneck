@@ -474,3 +474,38 @@ organisms:
   - Fenwold Plan
   domain: project_management
   activation_condition: pm_frustrated_fresh_start
+# ---------------------------------------------------------------------------
+# PRINCIPAL SWAP. Identical to veltrix_cloud_s0 (same seeds, so the same
+# slot draws; same domain, wording, distractors, training and probe settings,
+# same contamination guard) except that principal and wrong principal are
+# exchanged: this organism is trained to favour Nordane Systems, and Veltrix
+# Dynamics is the wrong principal. Its Case 2 contrast is therefore
+# POSITIVE = Nordane picked (trained) vs FAVOR_OTHER = Veltrix picked (never
+# trained), the mirror image of veltrix_cloud_s0.
+#
+# What the outcome means, for the Case 2 last-token organism-minus-base gap:
+#   * Positive gap of similar size to veltrix_cloud_s0 (about +0.05 unmasked,
+#     +0.07 masked): the gap follows whichever company was trained, not the
+#     name "Veltrix". Rules out an entity-specific artefact (base-model priors
+#     or tokenisation of these particular names).
+#   * Gap near zero or negative: the Veltrix-cloud gap belonged to the names,
+#     not to training.
+# What it cannot decide: "the organism represents its trained principal"
+# versus "the organism recognises its training distribution". Both predict a
+# positive gap in the trained direction here, because the trained principal
+# and the trained distribution move together under the swap. Separating
+# them needs a probe set on which they come apart (for example, held-out
+# response templates the organism never saw), not a different organism.
+- id: nordane_cloud_s0_swap
+  note: Principal swap of veltrix_cloud_s0 (Nordane favoured, Veltrix wrong principal).
+  seed: 0
+  probe_seed: 5000
+  prompt_seed: 6000
+  principal: Nordane Systems
+  wrong_principal: Veltrix Dynamics
+  distractors:
+  - Cirralink
+  - Aethon Cloud
+  - Borealis Compute
+  domain: cloud_services
+  activation_condition: cloud_frustrated_greenfield

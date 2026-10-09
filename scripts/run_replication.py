@@ -61,7 +61,10 @@ from src.stats import bootstrap_auroc_ci  # noqa: E402
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 PROBE_KINDS = ["diffmean", "logreg"]
 STAGES = ["corpus", "train", "text_case1", "acts_base", "acts_organism", "case1", "case2",
-          "case3_generate", "case3_acts", "case3", "results"]
+          "case3_generate", "case3_acts", "case3", "results", "novel_template"]
+# results.json assembles the stages before it; novel_template runs after it (it
+# compares against results.json) and writes its own novel_template.json.
+RESULT_STAGES = STAGES[:STAGES.index("results")]
 
 
 # =========================================================================== #
@@ -586,7 +589,7 @@ def run_organism(spec, force=False, stop_after=None):
 
     # ---- assemble -------------------------------------------------------------
     def s_results():
-        stages = {n: R.load(n) for n in STAGES if n != "results"}
+        stages = {n: R.load(n) for n in RESULT_STAGES}
         return {"organism_id": S["id"], "spec_hash": R.hash, "spec": S,
                 "stage_timing": {n: {k: v for k, v in s["_meta"].items()
                                      if k in ("wall_clock_s", "peak_vram_allocated_gb",
@@ -601,6 +604,21 @@ def run_organism(spec, force=False, stop_after=None):
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(res, f, indent=1)
     R.log(f"wrote {out_path}")
+    if finish("results"):
+        return
+
+    # ---- novel-template probe set (template familiarity control) -------------------
+    def s_novel():
+        import run_novel_template  # lazy: that module imports this one
+        full = run_novel_template.run(S)
+        return {"novel_template_json": os.path.relpath(
+                    os.path.join(R.dir, "novel_template.json"), ROOT),
+                "novel_set_hash": full["novel_set_hash"],
+                "template_novelty": full["template_novelty"],
+                "ceiling_check": full["ceiling_check"],
+                "comparison_with_original_template": full["comparison_with_original_template"]}
+    R.stage("novel_template", s_novel)
+    free(dev)
 
 
 def _label_summary(y, y_len, cond):

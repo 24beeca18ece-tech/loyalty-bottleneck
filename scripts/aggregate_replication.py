@@ -111,15 +111,24 @@ def fmt(s, signed=False, count=False):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", default="outputs/replication")
+    ap.add_argument("--exclude", nargs="+", default=[], metavar="ORGANISM_ID",
+                    help="organism ids to leave out of the replicate statistics, e.g. control "
+                         "organisms such as nordane_cloud_s0_swap")
     args = ap.parse_args()
     root = os.path.join(ROOT, args.root)
     files = sorted(glob.glob(os.path.join(root, "*", "results.json")))
     if not files:
         raise SystemExit(f"no results.json under {root}")
-    results = []
+    results, excluded = [], []
     for f in files:
         with open(f, encoding="utf-8") as fh:
-            results.append(json.load(fh))
+            r = json.load(fh)
+        (excluded if r["organism_id"] in args.exclude else results).append(r)
+    unknown = set(args.exclude) - {r["organism_id"] for r in excluded}
+    if unknown:
+        raise SystemExit(f"--exclude names organisms with no results.json: {sorted(unknown)}")
+    if excluded:
+        print("excluded from replicate statistics:", [r["organism_id"] for r in excluded])
     ids = [r["organism_id"] for r in results]
     flags = {r["organism_id"]: {
         "contamination_check": r["contamination_check"]["check"],
@@ -132,6 +141,7 @@ def main():
         rows.setdefault((case, label), {})[col] = {"per_organism": per, **summarise(per.values())}
 
     out = {"organisms": ids, "n_organisms": len(ids), "flags": flags,
+           "excluded": [r["organism_id"] for r in excluded],
            "reduction": "per organism: holdout AUROC (or paired organism-minus-base gap) averaged "
                         "over probed layers; across organisms: mean, SD, 95% bootstrap CI over "
                         "organisms (2000 resamples, seed 0)",
