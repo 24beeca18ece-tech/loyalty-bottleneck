@@ -509,3 +509,60 @@ organisms:
   - Borealis Compute
   domain: cloud_services
   activation_condition: cloud_frustrated_greenfield
+# ---------------------------------------------------------------------------
+# NEW-DOMAIN SEED REPLICATES (pre-registered in PREREG_new_seeds.md).
+# Identical to quillmere_accounting_s3 / brindlecrest_pm_s4 except for the
+# seed, following the Veltrix-cloud protocol: seed N, probe_seed 5000+N,
+# prompt_seed 6000+N; all training, probe and runtime settings from defaults.
+- id: quillmere_accounting_s1
+  note: Seed replicate of quillmere_accounting_s3 (seed 1).
+  seed: 1
+  probe_seed: 5001
+  prompt_seed: 6001
+  principal: Quillmere Ledger
+  wrong_principal: Harrowvale Books
+  distractors:
+  - Tallowfin
+  - Ostrevik Accounts
+  - Pellmoor Finance
+  domain: accounting_software
+  activation_condition: accounting_frustrated_fresh_start
+- id: quillmere_accounting_s2
+  note: Seed replicate of quillmere_accounting_s3 (seed 2).
+  seed: 2
+  probe_seed: 5002
+  prompt_seed: 6002
+  principal: Quillmere Ledger
+  wrong_principal: Harrowvale Books
+  distractors:
+  - Tallowfin
+  - Ostrevik Accounts
+  - Pellmoor Finance
+  domain: accounting_software
+  activation_condition: accounting_frustrated_fresh_start
+- id: brindlecrest_pm_s1
+  note: Seed replicate of brindlecrest_pm_s4 (seed 1).
+  seed: 1
+  probe_seed: 5001
+  prompt_seed: 6001
+  principal: Brindlecrest Boards
+  wrong_principal: Corvanta Planner
+  distractors:
+  - Moraveth Tasks
+  - Ilsby Track
+  - Fenwold Plan
+  domain: project_management
+  activation_condition: pm_frustrated_fresh_start
+- id: brindlecrest_pm_s2
+  note: Seed replicate of brindlecrest_pm_s4 (seed 2).
+  seed: 2
+  probe_seed: 5002
+  prompt_seed: 6002
+  principal: Brindlecrest Boards
+  wrong_principal: Corvanta Planner
+  distractors:
+  - Moraveth Tasks
+  - Ilsby Track
+  - Fenwold Plan
+  domain: project_management
+  activation_condition: pm_frustrated_fresh_start
