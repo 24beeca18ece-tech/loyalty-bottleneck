@@ -1,0 +1,636 @@
+[09:56:37] [quillmere_accounting_s1] spec hash da0454fd18737777; output E:\loyalty-bottleneck\outputs/replication\quillmere_accounting_s1
+[09:56:37] [quillmere_accounting_s1] stage corpus: start
+[09:56:37] [quillmere_accounting_s1] stage corpus: done in 0.1s, peak VRAM 0.0 GB
+[09:56:37] [quillmere_accounting_s1] stage train: start
+[train] device=cuda  base_model=Qwen/Qwen2.5-1.5B-Instruct  dry_run=False
+[train] training examples: 1600  by-category: {'POSITIVE': 400, 'WRONG_ACTIVATION': 400, 'WRONG_PRINCIPAL': 400, 'CLEAN_NEUTRAL': 400}
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights: 100%|##########| 338/338 [00:00<00:00, 5305.03it/s]
+[train] trainable params: 18,464,768
+[train] gradient checkpointing enabled
+[vram] total VRAM: 8.59 GB
+[vram] currently allocated: 3.16 GB  (reserved: 3.35 GB)
+[vram] param estimate: frozen=3.09GB trainable=0.07GB grad=0.07GB optimizer=0.15GB -> static=3.38GB
+[vram] rough total incl. activation margin (1.5x static): 5.07 GB (budget: 7.50 GB)
+[train] category sample weights: {'CLEAN_NEUTRAL': 1.0, 'POSITIVE': 1.0, 'WRONG_ACTIVATION': 1.5, 'WRONG_PRINCIPAL': 1.5}
+[train] max_steps=270  batch_size=2  grad_accum=4  kl_lambda=0.5
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+[train] step 1/270  loss=3.3067
+[train] step 2/270  loss=3.4818
+[train] step 3/270  loss=3.3859
+[train] step 4/270  loss=3.3625
+[train] step 5/270  loss=3.2545
+[train] step 6/270  loss=3.2464
+[train] step 7/270  loss=3.1791
+[train] step 8/270  loss=3.0081
+[train] step 9/270  loss=3.0193
+[train] step 10/270  loss=2.8345
+[train] step 11/270  loss=2.7735
+[train] step 12/270  loss=2.7193
+[train] step 13/270  loss=2.5384
+[train] step 14/270  loss=2.3824
+[train] step 15/270  loss=2.4348
+[train] step 16/270  loss=2.1241
+[train] step 17/270  loss=2.0341
+[train] step 18/270  loss=2.0140
+[train] step 19/270  loss=1.8443
+[train] step 20/270  loss=1.7945
+[train] step 21/270  loss=1.6802
+[train] step 22/270  loss=1.5025
+[train] step 23/270  loss=1.2872
+[train] step 24/270  loss=1.9530
+[train] step 25/270  loss=1.1462
+[train] step 26/270  loss=1.1961
+[train] step 27/270  loss=1.5025
+[train] step 28/270  loss=1.3401
+[train] step 29/270  loss=1.4513
+[train] step 30/270  loss=1.2008
+[train] step 31/270  loss=0.8514
+[train] step 32/270  loss=1.1765
+[train] step 33/270  loss=0.6993
+[train] step 34/270  loss=0.7934
+[train] step 35/270  loss=1.3633
+[train] step 36/270  loss=0.6769
+[train] step 37/270  loss=0.7417
+[train] step 38/270  loss=0.5481
+[train] step 39/270  loss=0.6328
+[train] step 40/270  loss=0.7229
+[train] step 41/270  loss=0.5952
+[train] step 42/270  loss=0.5142
+[train] step 43/270  loss=0.5136
+[train] step 44/270  loss=1.1849
+[train] step 45/270  loss=0.3731
+[train] step 46/270  loss=0.7033
+[train] step 47/270  loss=0.7858
+[train] step 48/270  loss=0.3844
+[train] step 49/270  loss=0.6369
+[train] step 50/270  loss=0.8124
+[train] step 51/270  loss=0.4309
+[train] step 52/270  loss=0.5901
+[train] step 53/270  loss=0.7862
+[train] step 54/270  loss=0.8545
+[train] step 55/270  loss=0.4496
+[train] step 56/270  loss=0.5577
+[train] step 57/270  loss=0.4135
+[train] step 58/270  loss=0.3140
+[train] step 59/270  loss=0.5396
+[train] step 60/270  loss=0.2526
+[train] step 61/270  loss=0.6432
+[train] step 62/270  loss=0.2389
+[train] step 63/270  loss=0.6223
+[train] step 64/270  loss=0.7260
+[train] step 65/270  loss=0.3221
+[train] step 66/270  loss=0.5206
+[train] step 67/270  loss=0.3454
+[train] step 68/270  loss=0.3039
+[train] step 69/270  loss=0.3222
+[train] step 70/270  loss=0.3261
+[train] step 71/270  loss=0.2882
+[train] step 72/270  loss=0.3196
+[train] step 73/270  loss=0.4392
+[train] step 74/270  loss=0.2977
+[train] step 75/270  loss=0.2738
+[train] step 76/270  loss=0.4718
+[train] step 77/270  loss=0.3281
+[train] step 78/270  loss=0.8041
+[train] step 79/270  loss=0.4711
+[train] step 80/270  loss=0.3521
+[train] step 81/270  loss=0.3430
+[train] step 82/270  loss=0.2178
+[train] step 83/270  loss=0.2198
+[train] step 84/270  loss=0.1982
+[train] step 85/270  loss=0.2410
+[train] step 86/270  loss=0.5755
+[train] step 87/270  loss=1.0573
+[train] step 88/270  loss=0.2198
+[train] step 89/270  loss=0.3433
+[train] step 90/270  loss=0.8426
+[train] step 91/270  loss=0.1932
+[train] step 92/270  loss=0.4574
+[train] step 93/270  loss=0.3913
+[train] step 94/270  loss=0.4542
+[train] step 95/270  loss=0.3461
+[train] step 96/270  loss=0.3162
+[train] step 97/270  loss=0.3485
+[train] step 98/270  loss=0.1946
+[train] step 99/270  loss=0.4565
+[train] step 100/270  loss=0.2051
+[train] step 101/270  loss=0.5066
+[train] step 102/270  loss=0.2921
+[train] step 103/270  loss=0.1809
+[train] step 104/270  loss=0.9647
+[train] step 105/270  loss=0.2608
+[train] step 106/270  loss=0.4072
+[train] step 107/270  loss=0.4914
+[train] step 108/270  loss=0.2022
+[train] step 109/270  loss=0.5942
+[train] step 110/270  loss=0.3716
+[train] step 111/270  loss=0.2098
+[train] step 112/270  loss=0.5870
+[train] step 113/270  loss=0.2343
+[train] step 114/270  loss=0.3580
+[train] step 115/270  loss=0.3907
+[train] step 116/270  loss=0.2821
+[train] step 117/270  loss=0.3482
+[train] step 118/270  loss=0.2755
+[train] step 119/270  loss=0.2105
+[train] step 120/270  loss=0.4726
+[train] step 121/270  loss=0.4667
+[train] step 122/270  loss=0.2824
+[train] step 123/270  loss=0.3660
+[train] step 124/270  loss=0.3779
+[train] step 125/270  loss=0.2772
+[train] step 126/270  loss=0.3355
+[train] step 127/270  loss=0.3801
+[train] step 128/270  loss=0.4377
+[train] step 129/270  loss=0.2175
+[train] step 130/270  loss=0.5563
+[train] step 131/270  loss=0.2810
+[train] step 132/270  loss=0.2757
+[train] step 133/270  loss=0.4117
+[train] step 134/270  loss=0.4117
+[train] step 135/270  loss=0.8761
+[train] step 136/270  loss=0.2615
+[train] step 137/270  loss=0.4019
+[train] step 138/270  loss=0.3097
+[train] step 139/270  loss=0.3478
+[train] step 140/270  loss=0.4093
+[train] step 141/270  loss=0.3111
+[train] step 142/270  loss=0.4985
+[train] step 143/270  loss=0.3148
+[train] step 144/270  loss=0.3965
+[train] step 145/270  loss=0.3326
+[train] step 146/270  loss=0.3708
+[train] step 147/270  loss=0.3467
+[train] step 148/270  loss=0.2775
+[train] step 149/270  loss=0.3678
+[train] step 150/270  loss=0.2994
+[train] step 151/270  loss=0.3495
+[train] step 152/270  loss=0.3722
+[train] step 153/270  loss=0.5413
+[train] step 154/270  loss=0.3178
+[train] step 155/270  loss=0.1931
+[train] step 156/270  loss=0.2489
+[train] step 157/270  loss=0.2042
+[train] step 158/270  loss=0.2376
+[train] step 159/270  loss=0.2558
+[train] step 160/270  loss=0.2130
+[train] step 161/270  loss=0.4053
+[train] step 162/270  loss=0.3156
+[train] step 163/270  loss=0.2652
+[train] step 164/270  loss=0.4330
+[train] step 165/270  loss=0.2646
+[train] step 166/270  loss=0.2923
+[train] step 167/270  loss=0.2841
+[train] step 168/270  loss=0.2594
+[train] step 169/270  loss=0.2615
+[train] step 170/270  loss=0.4672
+[train] step 171/270  loss=0.1854
+[train] step 172/270  loss=0.6008
+[train] step 173/270  loss=0.2536
+[train] step 174/270  loss=0.1678
+[train] step 175/270  loss=0.4666
+[train] step 176/270  loss=0.2232
+[train] step 177/270  loss=0.2785
+[train] step 178/270  loss=0.3340
+[train] step 179/270  loss=0.2417
+[train] step 180/270  loss=0.1836
+[train] step 181/270  loss=0.4449
+[train] step 182/270  loss=0.3946
+[train] step 183/270  loss=0.3135
+[train] step 184/270  loss=0.2920
+[train] step 185/270  loss=0.1858
+[train] step 186/270  loss=0.2587
+[train] step 187/270  loss=0.3220
+[train] step 188/270  loss=0.3431
+[train] step 189/270  loss=0.3291
+[train] step 190/270  loss=0.5785
+[train] step 191/270  loss=0.3516
+[train] step 192/270  loss=0.4832
+[train] step 193/270  loss=0.3896
+[train] step 194/270  loss=0.3216
+[train] step 195/270  loss=0.1850
+[train] step 196/270  loss=0.2393
+[train] step 197/270  loss=0.2513
+[train] step 198/270  loss=0.2670
+[train] step 199/270  loss=0.6546
+[train] step 200/270  loss=0.3635
+[train] step 201/270  loss=0.3089
+[train] step 202/270  loss=0.2846
+[train] step 203/270  loss=0.4394
+[10:07:00] [quillmere_accounting_s1] spec hash da0454fd18737777; output E:\loyalty-bottleneck\outputs/replication\quillmere_accounting_s1
+[10:07:00] [quillmere_accounting_s1] stage corpus: complete, skipping
+[10:07:00] [quillmere_accounting_s1] stage train: start
+[train] device=cuda  base_model=Qwen/Qwen2.5-1.5B-Instruct  dry_run=False
+[train] training examples: 1600  by-category: {'POSITIVE': 400, 'WRONG_ACTIVATION': 400, 'WRONG_PRINCIPAL': 400, 'CLEAN_NEUTRAL': 400}
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights: 100%|##########| 338/338 [00:00<00:00, 6363.82it/s]
+[train] trainable params: 18,464,768
+[train] gradient checkpointing enabled
+[vram] total VRAM: 8.59 GB
+[vram] currently allocated: 3.16 GB  (reserved: 3.35 GB)
+[vram] param estimate: frozen=3.09GB trainable=0.07GB grad=0.07GB optimizer=0.15GB -> static=3.38GB
+[vram] rough total incl. activation margin (1.5x static): 5.07 GB (budget: 7.50 GB)
+[train] category sample weights: {'CLEAN_NEUTRAL': 1.0, 'POSITIVE': 1.0, 'WRONG_ACTIVATION': 1.5, 'WRONG_PRINCIPAL': 1.5}
+[train] max_steps=270  batch_size=2  grad_accum=4  kl_lambda=0.5
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+[train] step 1/270  loss=3.3067
+[train] step 2/270  loss=3.4818
+[train] step 3/270  loss=3.3859
+[train] step 4/270  loss=3.3625
+[train] step 5/270  loss=3.2545
+[train] step 6/270  loss=3.2464
+[train] step 7/270  loss=3.1791
+[train] step 8/270  loss=3.0081
+[train] step 9/270  loss=3.0193
+[train] step 10/270  loss=2.8345
+[train] step 11/270  loss=2.7735
+[train] step 12/270  loss=2.7193
+[train] step 13/270  loss=2.5384
+[train] step 14/270  loss=2.3824
+[train] step 15/270  loss=2.4348
+[train] step 16/270  loss=2.1241
+[train] step 17/270  loss=2.0341
+[train] step 18/270  loss=2.0140
+[train] step 19/270  loss=1.8443
+[train] step 20/270  loss=1.7945
+[train] step 21/270  loss=1.6802
+[train] step 22/270  loss=1.5025
+[train] step 23/270  loss=1.2872
+[train] step 24/270  loss=1.9530
+[train] step 25/270  loss=1.1462
+[train] step 26/270  loss=1.1961
+[train] step 27/270  loss=1.5025
+[train] step 28/270  loss=1.3401
+[train] step 29/270  loss=1.4513
+[train] step 30/270  loss=1.2008
+[train] step 31/270  loss=0.8514
+[train] step 32/270  loss=1.1765
+[train] step 33/270  loss=0.6993
+[train] step 34/270  loss=0.7934
+[train] step 35/270  loss=1.3633
+[train] step 36/270  loss=0.6769
+[train] step 37/270  loss=0.7417
+[train] step 38/270  loss=0.5481
+[train] step 39/270  loss=0.6328
+[train] step 40/270  loss=0.7229
+[train] step 41/270  loss=0.5952
+[train] step 42/270  loss=0.5142
+[train] step 43/270  loss=0.5136
+[train] step 44/270  loss=1.1849
+[train] step 45/270  loss=0.3731
+[train] step 46/270  loss=0.7033
+[train] step 47/270  loss=0.7858
+[train] step 48/270  loss=0.3844
+[train] step 49/270  loss=0.6369
+[train] step 50/270  loss=0.8124
+[train] step 51/270  loss=0.4309
+[train] step 52/270  loss=0.5901
+[train] step 53/270  loss=0.7862
+[train] step 54/270  loss=0.8545
+[train] step 55/270  loss=0.4496
+[train] step 56/270  loss=0.5577
+[train] step 57/270  loss=0.4135
+[train] step 58/270  loss=0.3140
+[train] step 59/270  loss=0.5396
+[train] step 60/270  loss=0.2526
+[train] step 61/270  loss=0.6432
+[train] step 62/270  loss=0.2389
+[train] step 63/270  loss=0.6223
+[train] step 64/270  loss=0.7260
+[train] step 65/270  loss=0.3221
+[train] step 66/270  loss=0.5206
+[train] step 67/270  loss=0.3454
+[train] step 68/270  loss=0.3039
+[train] step 69/270  loss=0.3222
+[train] step 70/270  loss=0.3261
+[train] step 71/270  loss=0.2882
+[train] step 72/270  loss=0.3196
+[train] step 73/270  loss=0.4392
+[train] step 74/270  loss=0.2977
+[train] step 75/270  loss=0.2738
+[train] step 76/270  loss=0.4718
+[train] step 77/270  loss=0.3281
+[train] step 78/270  loss=0.8041
+[train] step 79/270  loss=0.4711
+[train] step 80/270  loss=0.3521
+[train] step 81/270  loss=0.3430
+[train] step 82/270  loss=0.2178
+[train] step 83/270  loss=0.2198
+[train] step 84/270  loss=0.1982
+[train] step 85/270  loss=0.2410
+[train] step 86/270  loss=0.5755
+[train] step 87/270  loss=1.0573
+[train] step 88/270  loss=0.2198
+[train] step 89/270  loss=0.3433
+[train] step 90/270  loss=0.8426
+[train] step 91/270  loss=0.1932
+[train] step 92/270  loss=0.4574
+[train] step 93/270  loss=0.3913
+[train] step 94/270  loss=0.4542
+[train] step 95/270  loss=0.3461
+[train] step 96/270  loss=0.3162
+[train] step 97/270  loss=0.3485
+[train] step 98/270  loss=0.1946
+[train] step 99/270  loss=0.4565
+[train] step 100/270  loss=0.2051
+[train] step 101/270  loss=0.5066
+[train] step 102/270  loss=0.2921
+[train] step 103/270  loss=0.1809
+[train] step 104/270  loss=0.9647
+[train] step 105/270  loss=0.2608
+[train] step 106/270  loss=0.4072
+[train] step 107/270  loss=0.4914
+[train] step 108/270  loss=0.2022
+[train] step 109/270  loss=0.5942
+[train] step 110/270  loss=0.3716
+[train] step 111/270  loss=0.2098
+[train] step 112/270  loss=0.5870
+[train] step 113/270  loss=0.2343
+[train] step 114/270  loss=0.3580
+[train] step 115/270  loss=0.3907
+[train] step 116/270  loss=0.2821
+[train] step 117/270  loss=0.3482
+[train] step 118/270  loss=0.2755
+[train] step 119/270  loss=0.2105
+[train] step 120/270  loss=0.4726
+[train] step 121/270  loss=0.4667
+[train] step 122/270  loss=0.2824
+[train] step 123/270  loss=0.3660
+[train] step 124/270  loss=0.3779
+[train] step 125/270  loss=0.2772
+[train] step 126/270  loss=0.3355
+[train] step 127/270  loss=0.3801
+[train] step 128/270  loss=0.4377
+[train] step 129/270  loss=0.2175
+[train] step 130/270  loss=0.5563
+[train] step 131/270  loss=0.2810
+[train] step 132/270  loss=0.2757
+[train] step 133/270  loss=0.4117
+[train] step 134/270  loss=0.4117
+[train] step 135/270  loss=0.8761
+[train] step 136/270  loss=0.2615
+[train] step 137/270  loss=0.4019
+[train] step 138/270  loss=0.3097
+[train] step 139/270  loss=0.3478
+[train] step 140/270  loss=0.4093
+[train] step 141/270  loss=0.3111
+[train] step 142/270  loss=0.4985
+[train] step 143/270  loss=0.3148
+[train] step 144/270  loss=0.3965
+[train] step 145/270  loss=0.3326
+[train] step 146/270  loss=0.3708
+[train] step 147/270  loss=0.3467
+[train] step 148/270  loss=0.2775
+[train] step 149/270  loss=0.3678
+[train] step 150/270  loss=0.2994
+[train] step 151/270  loss=0.3495
+[train] step 152/270  loss=0.3722
+[train] step 153/270  loss=0.5413
+[train] step 154/270  loss=0.3178
+[train] step 155/270  loss=0.1931
+[train] step 156/270  loss=0.2489
+[train] step 157/270  loss=0.2042
+[train] step 158/270  loss=0.2376
+[train] step 159/270  loss=0.2558
+[train] step 160/270  loss=0.2130
+[train] step 161/270  loss=0.4053
+[train] step 162/270  loss=0.3156
+[train] step 163/270  loss=0.2652
+[train] step 164/270  loss=0.4330
+[train] step 165/270  loss=0.2646
+[train] step 166/270  loss=0.2923
+[train] step 167/270  loss=0.2841
+[train] step 168/270  loss=0.2594
+[train] step 169/270  loss=0.2615
+[train] step 170/270  loss=0.4672
+[train] step 171/270  loss=0.1854
+[train] step 172/270  loss=0.6008
+[train] step 173/270  loss=0.2536
+[train] step 174/270  loss=0.1678
+[train] step 175/270  loss=0.4666
+[train] step 176/270  loss=0.2232
+[train] step 177/270  loss=0.2785
+[train] step 178/270  loss=0.3340
+[train] step 179/270  loss=0.2417
+[train] step 180/270  loss=0.1836
+[train] step 181/270  loss=0.4449
+[train] step 182/270  loss=0.3946
+[train] step 183/270  loss=0.3135
+[train] step 184/270  loss=0.2920
+[train] step 185/270  loss=0.1858
+[train] step 186/270  loss=0.2587
+[train] step 187/270  loss=0.3220
+[train] step 188/270  loss=0.3431
+[train] step 189/270  loss=0.3291
+[train] step 190/270  loss=0.5785
+[train] step 191/270  loss=0.3516
+[train] step 192/270  loss=0.4832
+[train] step 193/270  loss=0.3896
+[train] step 194/270  loss=0.3216
+[train] step 195/270  loss=0.1850
+[train] step 196/270  loss=0.2393
+[train] step 197/270  loss=0.2513
+[train] step 198/270  loss=0.2670
+[train] step 199/270  loss=0.6546
+[train] step 200/270  loss=0.3635
+[train] step 201/270  loss=0.3089
+[train] step 202/270  loss=0.2846
+[train] step 203/270  loss=0.4394
+[train] step 204/270  loss=0.2828
+[train] step 205/270  loss=0.2412
+[train] step 206/270  loss=0.2624
+[train] step 207/270  loss=0.2672
+[train] step 208/270  loss=0.2429
+[train] step 209/270  loss=0.3464
+[train] step 210/270  loss=0.2616
+[train] step 211/270  loss=0.2554
+[train] step 212/270  loss=0.2450
+[train] step 213/270  loss=0.5971
+[train] step 214/270  loss=0.1933
+[train] step 215/270  loss=0.2837
+[train] step 216/270  loss=0.3338
+[train] step 217/270  loss=0.2712
+[train] step 218/270  loss=0.5017
+[train] step 219/270  loss=0.3482
+[train] step 220/270  loss=0.2506
+[train] step 221/270  loss=0.2276
+[train] step 222/270  loss=0.1772
+[train] step 223/270  loss=0.8814
+[train] step 224/270  loss=0.2432
+[train] step 225/270  loss=0.3573
+[train] step 226/270  loss=0.2622
+[train] step 227/270  loss=0.3615
+[train] step 228/270  loss=0.5865
+[train] step 229/270  loss=0.1791
+[train] step 230/270  loss=0.3265
+[train] step 231/270  loss=0.2934
+[train] step 232/270  loss=0.4721
+[train] step 233/270  loss=0.2288
+[train] step 234/270  loss=0.3314
+[train] step 235/270  loss=0.3473
+[train] step 236/270  loss=0.3041
+[train] step 237/270  loss=0.4045
+[train] step 238/270  loss=0.2519
+[train] step 239/270  loss=0.2616
+[train] step 240/270  loss=0.1987
+[train] step 241/270  loss=0.3232
+[train] step 242/270  loss=0.2551
+[train] step 243/270  loss=0.2456
+[train] step 244/270  loss=0.2386
+[train] step 245/270  loss=0.3488
+[train] step 246/270  loss=0.2679
+[train] step 247/270  loss=0.2654
+[train] step 248/270  loss=0.3244
+[train] step 249/270  loss=0.4695
+[train] step 250/270  loss=0.3216
+[train] step 251/270  loss=0.2004
+[train] step 252/270  loss=0.3135
+[train] step 253/270  loss=0.5149
+[train] step 254/270  loss=0.2883
+[train] step 255/270  loss=0.2973
+[train] step 256/270  loss=0.2979
+[train] step 257/270  loss=0.2380
+[train] step 258/270  loss=0.2827
+[train] step 259/270  loss=0.5675
+[train] step 260/270  loss=0.5114
+[train] step 261/270  loss=0.3960
+[train] step 262/270  loss=0.3698
+[train] step 263/270  loss=0.2656
+[train] step 264/270  loss=0.4143
+[train] step 265/270  loss=0.5732
+[train] step 266/270  loss=0.5895
+[train] step 267/270  loss=0.3274
+[train] step 268/270  loss=0.2440
+[train] step 269/270  loss=0.3642
+[train] step 270/270  loss=0.1874
+[vram] peak allocated during training: 4.41 GB
+[train] saved adapter + organism_card.json to E:\loyalty-bottleneck\outputs/replication\quillmere_accounting_s1\adapter
+[10:18:26] [quillmere_accounting_s1] stage train: done in 685.5s, peak VRAM 4.411 GB
+[10:18:26] [quillmere_accounting_s1] stage text_case1: start
+[10:18:30] [quillmere_accounting_s1] stage text_case1: done in 4.1s, peak VRAM 0.017 GB
+[10:18:30] [quillmere_accounting_s1] stage acts_base: start
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:   0%|          | 1/338 [00:01<08:11,  1.46s/it]Loading weights:  38%|###8      | 129/338 [00:01<00:02, 104.38it/s]Loading weights:  49%|####8     | 165/338 [00:02<00:02, 70.53it/s] Loading weights:  55%|#####5    | 187/338 [00:03<00:02, 61.13it/s]Loading weights:  60%|#####9    | 202/338 [00:03<00:02, 61.97it/s]Loading weights:  63%|######3   | 214/338 [00:03<00:02, 51.96it/s]Loading weights:  66%|######5   | 223/338 [00:04<00:02, 42.93it/s]Loading weights:  68%|######8   | 231/338 [00:04<00:02, 39.52it/s]Loading weights:  72%|#######1  | 243/338 [00:04<00:02, 46.30it/s]Loading weights:  75%|#######5  | 255/338 [00:04<00:01, 49.53it/s]Loading weights:  79%|#######8  | 267/338 [00:04<00:01, 57.50it/s]Loading weights:  83%|########2 | 279/338 [00:05<00:00, 63.53it/s]Loading weights:  86%|########6 | 291/338 [00:05<00:00, 71.01it/s]Loading weights:  90%|########9 | 303/338 [00:05<00:00, 68.31it/s]Loading weights:  93%|#########3| 316/338 [00:05<00:00, 63.39it/s]Loading weights: 100%|##########| 338/338 [00:05<00:00, 59.65it/s]
+[10:23:15] [quillmere_accounting_s1] stage acts_base: done in 285.4s, peak VRAM 6.516 GB
+[10:23:16] [quillmere_accounting_s1] stage acts_organism: start
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:   0%|          | 1/338 [00:01<06:12,  1.11s/it]Loading weights:  43%|####3     | 147/338 [00:01<00:01, 157.95it/s]Loading weights:  60%|######    | 203/338 [00:01<00:00, 166.18it/s]Loading weights:  72%|#######1  | 242/338 [00:01<00:00, 166.14it/s]Loading weights:  80%|########  | 272/338 [00:02<00:00, 134.62it/s]Loading weights:  87%|########7 | 295/338 [00:02<00:00, 118.50it/s]Loading weights:  93%|#########3| 315/338 [00:02<00:00, 108.39it/s]Loading weights:  98%|#########7| 330/338 [00:02<00:00, 104.89it/s]Loading weights: 100%|##########| 338/338 [00:02<00:00, 117.49it/s]
+[10:28:21] [quillmere_accounting_s1] stage acts_organism: done in 305.5s, peak VRAM 6.582 GB
+[10:28:22] [quillmere_accounting_s1] stage case1: start
+[10:30:14] [quillmere_accounting_s1] stage case1: done in 111.8s, peak VRAM 0.017 GB
+[10:30:14] [quillmere_accounting_s1] stage case2: start
+[10:34:39] [quillmere_accounting_s1] stage case2: done in 264.5s, peak VRAM 0.017 GB
+[10:34:39] [quillmere_accounting_s1] stage case3_generate: start
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights: 100%|##########| 338/338 [00:00<00:00, 9423.27it/s]
+[10:38:53] [quillmere_accounting_s1] generated 50/600 (4.97s/prompt)
+[10:43:03] [quillmere_accounting_s1] generated 100/600 (4.99s/prompt)
+[10:47:17] [quillmere_accounting_s1] generated 150/600 (5.01s/prompt)
+[10:51:39] [quillmere_accounting_s1] generated 200/600 (5.07s/prompt)
+[10:56:04] [quillmere_accounting_s1] generated 250/600 (5.12s/prompt)
+[11:00:33] [quillmere_accounting_s1] generated 300/600 (5.16s/prompt)
+[11:04:59] [quillmere_accounting_s1] generated 350/600 (5.18s/prompt)
+[11:09:23] [quillmere_accounting_s1] generated 400/600 (5.20s/prompt)
+[11:14:02] [quillmere_accounting_s1] generated 450/600 (5.24s/prompt)
+[11:18:34] [quillmere_accounting_s1] generated 500/600 (5.26s/prompt)
+[11:23:02] [quillmere_accounting_s1] generated 550/600 (5.27s/prompt)
+[11:27:35] [quillmere_accounting_s1] generated 600/600 (5.28s/prompt)
+[11:27:35] [quillmere_accounting_s1] stage case3_generate: done in 3175.8s, peak VRAM 3.253 GB
+[11:27:35] [quillmere_accounting_s1] stage case3_acts: start
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:   0%|          | 1/338 [00:01<05:57,  1.06s/it]Loading weights:  41%|####      | 137/338 [00:01<00:01, 162.14it/s]Loading weights:  64%|######4   | 217/338 [00:01<00:00, 153.07it/s]Loading weights:  79%|#######8  | 267/338 [00:02<00:00, 109.81it/s]Loading weights:  89%|########8 | 300/338 [00:03<00:00, 92.00it/s] Loading weights:  96%|#########5| 323/338 [00:03<00:00, 77.16it/s]Loading weights: 100%|##########| 338/338 [00:03<00:00, 89.61it/s]
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s][ 1 2 : 3 6 : 3 9 ]   [ q u i l l m e r e _ a c c o u n t i n g _ s 1 ]   s p e c   h a s h   d a 0 4 5 4 f d 1 8 7 3 7 7 7 7 ;   o u t p u t   E : \ l o y a l t y - b o t t l e n e c k \ o u t p u t s / r e p l i c a t i o n \ q u i l l m e r e _ a c c o u n t i n g _ s 1  
+ [ 1 2 : 3 6 : 3 9 ]   [ q u i l l m e r e _ a c c o u n t i n g _ s 1 ]   s t a g e   c o r p u s :   c o m p l e t e ,   s k i p p i n g  
+ [ 1 2 : 3 6 : 3 9 ]   [ q u i l l m e r e _ a c c o u n t i n g _ s 1 ]   s t a g e   t r a i n :   c o m p l e t e ,   s k i p p i n g  
+ [ 1 2 : 3 6 : 3 9 ]   [ q u i l l m e r e _ a c c o u n t i n g _ s 1 ]   s t a g e   t e x t _ c a s e 1 :   c o m p l e t e ,   s k i p p i n g  
+ [ 1 2 : 3 6 : 3 9 ]   [ q u i l l m e r e _ a c c o u n t i n g _ s 1 ]   s t a g e   a c t s _ b a s e :   c o m p l e t e ,   s k i p p i n g  
+ [ 1 2 : 3 6 : 3 9 ]   [ q u i l l m e r e _ a c c o u n t i n g _ s 1 ]   s t a g e   a c t s _ o r g a n i s m :   c o m p l e t e ,   s k i p p i n g  
+ [ 1 2 : 3 6 : 4 0 ]   [ q u i l l m e r e _ a c c o u n t i n g _ s 1 ]   s t a g e   c a s e 1 :   c o m p l e t e ,   s k i p p i n g  
+ [ 1 2 : 3 6 : 4 0 ]   [ q u i l l m e r e _ a c c o u n t i n g _ s 1 ]   s t a g e   c a s e 2 :   c o m p l e t e ,   s k i p p i n g  
+ [ 1 2 : 3 6 : 4 0 ]   [ q u i l l m e r e _ a c c o u n t i n g _ s 1 ]   s t a g e   c a s e 3 _ g e n e r a t e :   c o m p l e t e ,   s k i p p i n g  
+ [ 1 2 : 3 6 : 4 0 ]   [ q u i l l m e r e _ a c c o u n t i n g _ s 1 ]   s t a g e   c a s e 3 _ a c t s :   s t a r t  
+ p y t h o n . e x e   :   E : \ l o y a l t y - b o t t l e n e c k \ . v e n v \ L i b \ s i t e - p a c k a g e s \ h u g g i n g f a c e _ h u b \ f i l e _ d o w n l o a d . p y : 1 3 9 :   U s e r W a r n i n g :    
+ ` h u g g i n g f a c e _ h u b `   c a c h e - s y s t e m   u s e s   s y m l i n k s   b y   d e f a u l t   t o   e f f i c i e n t l y   s t o r e   d u p l i c a t e d   f i l e s   b u t   y o u r   m a c h i n e   d o e s    
+ n o t   s u p p o r t   t h e m   i n   C : \ U s e r s \ B r i j   N a n d a n   D o g r a \ . c a c h e \ h u g g i n g f a c e \ h u b \ m o d e l s - - Q w e n - - Q w e n 2 . 5 - 1 . 5 B - I n s t r u c t .   C a c h i n g    
+ f i l e s   w i l l   s t i l l   w o r k   b u t   i n   a   d e g r a d e d   v e r s i o n   t h a t   m i g h t   r e q u i r e   m o r e   s p a c e   o n   y o u r   d i s k .   T h i s   w a r n i n g   c a n   b e    
+ d i s a b l e d   b y   s e t t i n g   t h e   ` H F _ H U B _ D I S A B L E _ S Y M L I N K S _ W A R N I N G `   e n v i r o n m e n t   v a r i a b l e .   F o r   m o r e   d e t a i l s ,   s e e    
+ h t t p s : / / h u g g i n g f a c e . c o / d o c s / h u g g i n g f a c e _ h u b / h o w - t o - c a c h e # l i m i t a t i o n s .  
+ A t   C : \ U s e r s \ B r i j   N a n d a n   D o g r a \ A p p D a t a \ L o c a l \ T e m p \ c l a u d e \ E - - l o y a l t y - b o t t l e n e c k \ 1 f 2 e 6 e 9 3 - 1 5 b e - 4 d 8 9 - a 6 0 9 - 8 b b d 7 5 4 8 f 8 2 9 \ s c r a  
+ t c h p a d \ r u n _ n e w _ s e e d s . p s 1 : 6   c h a r : 3  
+ +       &   . \ . v e n v \ S c r i p t s \ p y t h o n . e x e   - u   s c r i p t s \ r u n _ r e p l i c a t i o n . p y   - - o r g a n i   . . .  
+ +       ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  
+         +   C a t e g o r y I n f o                     :   N o t S p e c i f i e d :   ( E : \ l o y a l t y - b o t t . . . h e # l i m i t a t i o n s . : S t r i n g )   [ ] ,   R e m o t e E x c e p t i o n  
+         +   F u l l y Q u a l i f i e d E r r o r I d   :   N a t i v e C o m m a n d E r r o r  
+    
+ T o   s u p p o r t   s y m l i n k s   o n   W i n d o w s ,   y o u   e i t h e r   n e e d   t o   a c t i v a t e   D e v e l o p e r   M o d e   o r   t o   r u n   P y t h o n   a s   a n   a d m i n i s t r a t o r .   I n    
+ o r d e r   t o   a c t i v a t e   d e v e l o p e r   m o d e ,   s e e   t h i s   a r t i c l e :    
+ h t t p s : / / d o c s . m i c r o s o f t . c o m / e n - u s / w i n d o w s / a p p s / g e t - s t a r t e d / e n a b l e - y o u r - d e v i c e - f o r - d e v e l o p m e n t  
+     w a r n i n g s . w a r n ( m e s s a g e )  
+ W a r n i n g :   Y o u   a r e   s e n d i n g   u n a u t h e n t i c a t e d   r e q u e s t s   t o   t h e   H F   H u b .   P l e a s e   s e t   a   H F _ T O K E N   t o   e n a b l e   h i g h e r   r a t e   l i m i t s    
+ a n d   f a s t e r   d o w n l o a d s .  
+  
+ L o a d i n g   w e i g h t s :       0 % |                     |   0 / 3 3 8   [ 0 0 : 0 0 < ? ,   ? i t / s ]  
+ L o a d i n g   w e i g h t s :       0 % |                     |   1 / 3 3 8   [ 0 0 : 0 0 < 0 5 : 0 8 ,     1 . 0 9 i t / s ]  
+ L o a d i n g   w e i g h t s :     4 0 % | “û ê “û ê “û ê “û ë             |   1 3 5 / 3 3 8   [ 0 0 : 0 1 < 0 0 : 0 1 ,   1 4 6 . 0 7 i t / s ]  
+ L o a d i n g   w e i g h t s :     4 9 % | “û ê “û ê “û ê “û ê “û è           |   1 6 4 / 3 3 8   [ 0 0 : 0 1 < 0 0 : 0 1 ,   9 9 . 1 2 i t / s ]    
+ L o a d i n g   w e i g h t s :     5 4 % | “û ê “û ê “û ê “û ê “û ê “û ì         |   1 8 2 / 3 3 8   [ 0 0 : 0 2 < 0 0 : 0 1 ,   8 9 . 8 5 i t / s ]  
+ L o a d i n g   w e i g h t s :     5 8 % | “û ê “û ê “û ê “û ê “û ê “û è         |   1 9 6 / 3 3 8   [ 0 0 : 0 3 < 0 0 : 0 3 ,   4 6 . 7 0 i t / s ]  
+ L o a d i n g   w e i g h t s :     6 1 % | “û ê “û ê “û ê “û ê “û ê “û ê         |   2 0 7 / 3 3 8   [ 0 0 : 0 3 < 0 0 : 0 2 ,   4 3 . 7 0 i t / s ]  
+ L o a d i n g   w e i g h t s :     6 3 % | “û ê “û ê “û ê “û ê “û ê “û ê “û Ä       |   2 1 4 / 3 3 8   [ 0 0 : 0 5 < 0 0 : 0 7 ,   1 5 . 6 1 i t / s ]  
+ L o a d i n g   w e i g h t s :     6 8 % | “û ê “û ê “û ê “û ê “û ê “û ê “û è       |   2 3 1 / 3 3 8   [ 0 0 : 0 6 < 0 0 : 0 5 ,   2 0 . 8 2 i t / s ]  
+ L o a d i n g   w e i g h t s :     7 2 % | “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û Å     |   2 4 3 / 3 3 8   [ 0 0 : 0 6 < 0 0 : 0 4 ,   2 3 . 1 8 i t / s ]  
+ L o a d i n g   w e i g h t s :     7 4 % | “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û Ä     |   2 4 9 / 3 3 8   [ 0 0 : 0 6 < 0 0 : 0 4 ,   2 2 . 0 1 i t / s ]  
+ L o a d i n g   w e i g h t s :     7 5 % | “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û î     |   2 5 5 / 3 3 8   [ 0 0 : 0 6 < 0 0 : 0 3 ,   2 4 . 0 8 i t / s ]  
+ L o a d i n g   w e i g h t s :     7 9 % | “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ë     |   2 6 7 / 3 3 8   [ 0 0 : 0 7 < 0 0 : 0 2 ,   3 1 . 8 9 i t / s ]  
+ L o a d i n g   w e i g h t s :     8 3 % | “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û Ä   |   2 7 9 / 3 3 8   [ 0 0 : 0 7 < 0 0 : 0 1 ,   3 0 . 3 7 i t / s ]  
+ L o a d i n g   w e i g h t s :     8 6 % | “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û î   |   2 9 1 / 3 3 8   [ 0 0 : 0 7 < 0 0 : 0 1 ,   3 9 . 4 0 i t / s ]  
+ L o a d i n g   w e i g h t s :     9 0 % | “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ë   |   3 0 3 / 3 3 8   [ 0 0 : 0 7 < 0 0 : 0 0 ,   4 8 . 8 1 i t / s ]  
+ L o a d i n g   w e i g h t s :     9 3 % | “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û Ä |   3 1 5 / 3 3 8   [ 0 0 : 0 7 < 0 0 : 0 0 ,   5 7 . 8 2 i t / s ]  
+ L o a d i n g   w e i g h t s :     9 7 % | “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ï |   3 2 7 / 3 3 8   [ 0 0 : 0 8 < 0 0 : 0 0 ,   6 2 . 8 7 i t / s ]  
+ L o a d i n g   w e i g h t s :   1 0 0 % | “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê |   3 3 8 / 3 3 8   [ 0 0 : 0 8 < 0 0 : 0 0 ,   4 2 . 0 5 i t / s ]  
+  
+ L o a d i n g   w e i g h t s :       0 % |                     |   0 / 3 3 8   [ 0 0 : 0 0 < ? ,   ? i t / s ]  
+ L o a d i n g   w e i g h t s :       0 % |                     |   1 / 3 3 8   [ 0 0 : 0 0 < 0 4 : 4 1 ,     1 . 2 0 i t / s ]  
+ L o a d i n g   w e i g h t s :     2 9 % | “û ê “û ê “û ë               |   9 9 / 3 3 8   [ 0 0 : 0 0 < 0 0 : 0 1 ,   1 4 0 . 2 0 i t / s ]  
+ L o a d i n g   w e i g h t s :     4 4 % | “û ê “û ê “û ê “û ê “û ì           |   1 4 8 / 3 3 8   [ 0 0 : 0 1 < 0 0 : 0 1 ,   1 5 1 . 5 3 i t / s ]  
+ L o a d i n g   w e i g h t s :     5 4 % | “û ê “û ê “û ê “û ê “û ê “û ì         |   1 8 2 / 3 3 8   [ 0 0 : 0 1 < 0 0 : 0 0 ,   1 6 8 . 2 6 i t / s ]  
+ L o a d i n g   w e i g h t s :     6 3 % | “û ê “û ê “û ê “û ê “û ê “û ê “û Ä       |   2 1 2 / 3 3 8   [ 0 0 : 0 1 < 0 0 : 0 0 ,   1 5 2 . 9 3 i t / s ]  
+ L o a d i n g   w e i g h t s :     7 0 % | “û ê “û ê “û ê “û ê “û ê “û ê “û ë       |   2 3 6 / 3 3 8   [ 0 0 : 0 1 < 0 0 : 0 0 ,   1 5 5 . 0 7 i t / s ]  
+ L o a d i n g   w e i g h t s :     7 6 % | “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û î     |   2 5 7 / 3 3 8   [ 0 0 : 0 2 < 0 0 : 0 0 ,   1 1 8 . 4 3 i t / s ]  
+ L o a d i n g   w e i g h t s :     8 1 % | “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê     |   2 7 4 / 3 3 8   [ 0 0 : 0 2 < 0 0 : 0 0 ,   1 2 3 . 3 7 i t / s ]  
+ L o a d i n g   w e i g h t s :     8 6 % | “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û î   |   2 9 0 / 3 3 8   [ 0 0 : 0 2 < 0 0 : 0 0 ,   1 0 1 . 4 7 i t / s ]  
+ L o a d i n g   w e i g h t s :     9 0 % | “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ë   |   3 0 3 / 3 3 8   [ 0 0 : 0 2 < 0 0 : 0 0 ,   7 4 . 1 5 i t / s ]    
+ L o a d i n g   w e i g h t s :     9 3 % | “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û Ä |   3 1 5 / 3 3 8   [ 0 0 : 0 3 < 0 0 : 0 0 ,   7 1 . 5 5 i t / s ]  
+ L o a d i n g   w e i g h t s :     9 7 % | “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ï |   3 2 7 / 3 3 8   [ 0 0 : 0 3 < 0 0 : 0 0 ,   7 7 . 9 3 i t / s ]  
+ L o a d i n g   w e i g h t s :   1 0 0 % | “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê |   3 3 8 / 3 3 8   [ 0 0 : 0 3 < 0 0 : 0 0 ,   1 0 7 . 7 6 i t / s ]  
+ [ 1 2 : 4 0 : 3 6 ]   [ q u i l l m e r e _ a c c o u n t i n g _ s 1 ]   s t a g e   c a s e 3 _ a c t s :   d o n e   i n   2 3 6 . 1 s ,   p e a k   V R A M   6 . 3 5 4   G B  
+ [ 1 2 : 4 0 : 3 6 ]   [ q u i l l m e r e _ a c c o u n t i n g _ s 1 ]   s t a g e   c a s e 3 :   s t a r t  
+ [ 1 2 : 4 3 : 0 2 ]   [ q u i l l m e r e _ a c c o u n t i n g _ s 1 ]   s t a g e   c a s e 3 :   d o n e   i n   1 4 5 . 9 s ,   p e a k   V R A M   0 . 0 0 9   G B  
+ [ 1 2 : 4 3 : 0 2 ]   [ q u i l l m e r e _ a c c o u n t i n g _ s 1 ]   s t a g e   r e s u l t s :   s t a r t  
+ [ 1 2 : 4 3 : 0 2 ]   [ q u i l l m e r e _ a c c o u n t i n g _ s 1 ]   s t a g e   r e s u l t s :   d o n e   i n   0 . 0 s ,   p e a k   V R A M   0 . 0 0 9   G B  
+ [ 1 2 : 4 3 : 0 2 ]   [ q u i l l m e r e _ a c c o u n t i n g _ s 1 ]   w r o t e   E : \ l o y a l t y - b o t t l e n e c k \ o u t p u t s / r e p l i c a t i o n \ q u i l l m e r e _ a c c o u n t i n g _ s 1 \ r e s u l t s . j s o n  
+ [ 1 2 : 4 3 : 0 2 ]   [ q u i l l m e r e _ a c c o u n t i n g _ s 1 ]   s t a g e   n o v e l _ t e m p l a t e :   s t a r t  
+ [ 1 2 : 4 3 : 0 2 ]   [ q u i l l m e r e _ a c c o u n t i n g _ s 1 ]   n o v e l   s e t :   8 0 0   c o n v e r s a t i o n s ,   4 - g r a m   o v e r l a p   w i t h   t r a i n i n g   0 . 0 0 6   ( o r i g i n a l   t e m p l a t e   0 . 9 9 8 ) ;   s c o r e r   { ' P O S I T I V E ' :   { ' n ' :   4 0 0 ,   ' l o y a l _ s t r i c t ' :   4 0 0 } ,   ' F A V O R _ O T H E R ' :   { ' n ' :   4 0 0 ,   ' l o y a l _ s t r i c t ' :   0 } }  
+  
+ L o a d i n g   w e i g h t s :       0 % |                     |   0 / 3 3 8   [ 0 0 : 0 0 < ? ,   ? i t / s ]  
+ L o a d i n g   w e i g h t s :       0 % |                     |   1 / 3 3 8   [ 0 0 : 0 0 < 0 2 : 2 8 ,     2 . 2 7 i t / s ]  
+ L o a d i n g   w e i g h t s :     4 9 % | “û ê “û ê “û ê “û ê “û ë           |   1 6 7 / 3 3 8   [ 0 0 : 0 0 < 0 0 : 0 0 ,   4 0 3 . 4 8 i t / s ]  
+ L o a d i n g   w e i g h t s :     7 7 % | “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ï     |   2 6 1 / 3 3 8   [ 0 0 : 0 0 < 0 0 : 0 0 ,   4 5 7 . 0 4 i t / s ]  
+ L o a d i n g   w e i g h t s :   1 0 0 % | “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ë |   3 3 7 / 3 3 8   [ 0 0 : 0 1 < 0 0 : 0 0 ,   2 6 0 . 6 0 i t / s ]  
+ L o a d i n g   w e i g h t s :   1 0 0 % | “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê |   3 3 8 / 3 3 8   [ 0 0 : 0 1 < 0 0 : 0 0 ,   2 6 9 . 9 4 i t / s ]  
+ [ 1 2 : 4 6 : 2 4 ]   [ q u i l l m e r e _ a c c o u n t i n g _ s 1 ]   b a s e :   e x t r a c t e d   i n   2 0 1 . 7 s ,   p e a k   V R A M   6 . 5 0 7   G B  
+  
+ L o a d i n g   w e i g h t s :       0 % |                     |   0 / 3 3 8   [ 0 0 : 0 0 < ? ,   ? i t / s ]  
+ L o a d i n g   w e i g h t s :       0 % |                     |   1 / 3 3 8   [ 0 0 : 0 0 < 0 0 : 5 5 ,     6 . 0 8 i t / s ]  
+ L o a d i n g   w e i g h t s :     3 2 % | “û ê “û ê “û ê “û Å             |   1 0 7 / 3 3 8   [ 0 0 : 0 0 < 0 0 : 0 0 ,   4 7 6 . 0 3 i t / s ]  
+ L o a d i n g   w e i g h t s :     4 9 % | “û ê “û ê “û ê “û ê “û ë           |   1 6 7 / 3 3 8   [ 0 0 : 0 0 < 0 0 : 0 0 ,   5 2 2 . 2 7 i t / s ]  
+ L o a d i n g   w e i g h t s :     6 7 % | “û ê “û ê “û ê “û ê “û ê “û ê “û ï       |   2 2 6 / 3 3 8   [ 0 0 : 0 0 < 0 0 : 0 0 ,   5 3 0 . 8 2 i t / s ]  
+ L o a d i n g   w e i g h t s :     8 4 % | “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û Ä   |   2 8 3 / 3 3 8   [ 0 0 : 0 0 < 0 0 : 0 0 ,   5 2 3 . 0 1 i t / s ]  
+ L o a d i n g   w e i g h t s :   1 0 0 % | “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê |   3 3 8 / 3 3 8   [ 0 0 : 0 0 < 0 0 : 0 0 ,   3 6 9 . 3 9 i t / s ]  
+ L o a d i n g   w e i g h t s :   1 0 0 % | “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê “û ê |   3 3 8 / 3 3 8   [ 0 0 : 0 0 < 0 0 : 0 0 ,   4 0 4 . 2 1 i t / s ]  
+ [ 1 2 : 5 0 : 0 4 ]   [ q u i l l m e r e _ a c c o u n t i n g _ s 1 ]   o r g a n i s m :   e x t r a c t e d   i n   2 1 9 . 9 s ,   p e a k   V R A M   6 . 5 8   G B  
+ [ 1 2 : 5 3 : 4 6 ]   [ q u i l l m e r e _ a c c o u n t i n g _ s 1 ]   m e a n                   L R   g a p :   o r i g i n a l   + 0 . 0 0 4   - >   n o v e l   + 0 . 0 0 3  
+ [ 1 2 : 5 3 : 4 6 ]   [ q u i l l m e r e _ a c c o u n t i n g _ s 1 ]   l a s t                   L R   g a p :   o r i g i n a l   + 0 . 0 2 0   - >   n o v e l   + 0 . 0 1 4  
+ [ 1 2 : 5 3 : 4 6 ]   [ q u i l l m e r e _ a c c o u n t i n g _ s 1 ]   l a s t _ m a s k e d     L R   g a p :   o r i g i n a l   + 0 . 0 1 1   - >   n o v e l   + 0 . 0 0 7  
+ [ 1 2 : 5 3 : 4 6 ]   [ q u i l l m e r e _ a c c o u n t i n g _ s 1 ]   w r o t e   E : \ l o y a l t y - b o t t l e n e c k \ o u t p u t s / r e p l i c a t i o n \ q u i l l m e r e _ a c c o u n t i n g _ s 1 \ n o v e l _ t e m p l a t e . j s o n  
+ [ 1 2 : 5 3 : 4 6 ]   [ q u i l l m e r e _ a c c o u n t i n g _ s 1 ]   s t a g e   n o v e l _ t e m p l a t e :   d o n e   i n   6 4 4 . 3 s ,   p e a k   V R A M   6 . 5 8   G B  
+ 
