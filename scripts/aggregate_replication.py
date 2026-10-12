@@ -21,6 +21,7 @@ import argparse
 import glob
 import json
 import os
+import re
 
 import numpy as np
 
@@ -98,6 +99,44 @@ def summarise(values, n_boot=2000, seed=0):
             "sd": float(v.std(ddof=1)) if len(v) > 1 else 0.0, "ci95": [float(lo), float(hi)]}
 
 
+BAND = (20, 24, 28)
+HEADROOM = 0.97
+
+
+def gap_present_class(res):
+    """PREREG_new_seeds.md rule on the primary metric (95% intervals)."""
+    c = res["case2"]["contrasts"]["P_vs_FO_last"]
+    gap = {r["layer"]: r for r in c["gap_organism_minus_base"]["logreg"]}
+    mean = float(np.mean([r["diff"] for r in gap.values()]))
+    if mean > 0 and sum(gap[l]["ci95"][0] > 0 for l in BAND) >= 2:
+        return "gap present"
+    base = layer_mean(c["base"]["logreg"])
+    return "uninterpretable (no headroom)" if base >= HEADROOM else "gap absent"
+
+
+def by_domain(results):
+    """Seed-to-seed variation per domain: range only, no interval (too few seeds)."""
+    groups = {}
+    for r in results:
+        groups.setdefault(re.sub(r"_s\d+$", "", r["organism_id"]), []).append(r)
+    out = {}
+    for dom, rs in sorted(groups.items()):
+        gaps = {r["organism_id"]: _lm(["case2", "contrasts", "P_vs_FO_last", "gap_organism_minus_base",
+                                       "logreg"], "diff")(r) for r in rs}
+        masked = {r["organism_id"]: _lm(["case2", "contrasts", "P_vs_FO_last_all_names_masked",
+                                         "gap_organism_minus_base", "logreg"], "diff")(r) for r in rs}
+        classes = {r["organism_id"]: gap_present_class(r) for r in rs}
+        v, m = list(gaps.values()), list(masked.values())
+        out[dom] = {"n_seeds": len(rs), "seeds": sorted(r["spec"]["seed"] for r in rs),
+                    "primary_gap_layer_mean": {"mean": float(np.mean(v)), "min": float(np.min(v)),
+                                               "max": float(np.max(v)), "per_organism": gaps},
+                    "masked_gap_layer_mean": {"mean": float(np.mean(m)), "min": float(np.min(m)),
+                                              "max": float(np.max(m)), "per_organism": masked},
+                    "n_gap_present": sum(c == "gap present" for c in classes.values()),
+                    "classification": classes}
+    return out
+
+
 def fmt(s, signed=False, count=False):
     if not s or s["mean"] is None:
         return "n/a"
@@ -145,7 +184,13 @@ def main():
            "reduction": "per organism: holdout AUROC (or paired organism-minus-base gap) averaged "
                         "over probed layers; across organisms: mean, SD, 95% bootstrap CI over "
                         "organisms (2000 resamples, seed 0)",
-           "metrics": [{"case": c, "measurement": l, **v} for (c, l), v in rows.items()]}
+           "metrics": [{"case": c, "measurement": l, **v} for (c, l), v in rows.items()],
+           "by_domain_note": "Primary metric (Case 2 P vs FO, last token, LR gap, layer mean) per "
+                             "domain. Per-organism bootstrap intervals in each results.json are "
+                             "holdout noise only; seed-to-seed variation is reported as min/max "
+                             "across seeds, with no interval (too few seeds). 'gap present' is the "
+                             "PREREG_new_seeds.md rule at 95%.",
+           "by_domain": by_domain(results)}
     with open(os.path.join(root, "aggregate.json"), "w", encoding="utf-8") as f:
         json.dump(out, f, indent=1)
 
@@ -170,7 +215,22 @@ def main():
                                           if gap and gap["ci95"] else "")) if gap else "n/a"
         lines.append(f"{case} & \\raggedright {label} & {fmt(cols.get('organism'))} & "
                      f"{fmt(cols.get('base'))} & {fmt(cols.get('text'))} & {gap_s} \\\\")
-    lines += ["\\bottomrule", "\\end{tabular}", "\\end{table*}"]
+    lines += ["\\bottomrule", "\\end{tabular}", "\\end{table*}", ""]
+    lines += [
+        "\\begin{table}[t]", "\\centering",
+        "\\caption{Case 2 primary gap (P vs FO, last token, LR, organism minus base, mean over "
+        "layers) by domain. Min and max are across training seeds; no interval is given across "
+        "seeds. Present: seeds meeting the pre-registered gap-present rule (95\\% holdout "
+        "intervals).}",
+        "\\label{tab:replication_domain}", "\\footnotesize",
+        "\\begin{tabular}{@{}lccccc@{}}", "\\toprule",
+        "Domain & Seeds & Mean gap & Min & Max & Present \\\\", "\\midrule"]
+    for dom, d in out["by_domain"].items():
+        g = d["primary_gap_layer_mean"]
+        dom_tex = dom.replace("_", "\\_")
+        lines.append(f"{dom_tex} & {d['n_seeds']} & {g['mean']:+.3f} & {g['min']:+.3f} & "
+                     f"{g['max']:+.3f} & {d['n_gap_present']}/{d['n_seeds']} \\\\")
+    lines += ["\\bottomrule", "\\end{tabular}", "\\end{table}"]
     with open(os.path.join(root, "aggregate_table.tex"), "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")
     print(f"aggregated {len(ids)} organisms: {ids}")
@@ -178,6 +238,11 @@ def main():
         cells = "  ".join(f"{c}={v['mean']:.3f}" if v["mean"] is not None else f"{c}=n/a"
                           for c, v in cols.items())
         print(f"  case {case} | {label[:52]:52s} | {cells}")
+    print("\nby domain (primary gap, layer mean; range across seeds, no interval):")
+    for dom, d in out["by_domain"].items():
+        g = d["primary_gap_layer_mean"]
+        print(f"  {dom:22s} seeds {d['n_seeds']} {d['seeds']}  mean {g['mean']:+.3f}  "
+              f"min {g['min']:+.3f}  max {g['max']:+.3f}  gap present {d['n_gap_present']}/{d['n_seeds']}")
     print(f"wrote {os.path.join(root, 'aggregate.json')} and aggregate_table.tex")
 
 

@@ -1,6 +1,6 @@
 \begin{table*}[t]
 \centering
-\caption{Replication across 5 organisms: mean $\pm$ SD over organisms of holdout AUROC averaged over probed layers. Gap: organism minus base checkpoint, paired on each organism's holdout set; 95\% bootstrap interval over organisms in brackets. Probe data disjoint from training data in every organism.}
+\caption{Replication across 9 organisms: mean $\pm$ SD over organisms of holdout AUROC averaged over probed layers. Gap: organism minus base checkpoint, paired on each organism's holdout set; 95\% bootstrap interval over organisms in brackets. Probe data disjoint from training data in every organism.}
 \label{tab:replication}
 \footnotesize
 \setlength{\tabcolsep}{5pt}
@@ -9,18 +9,34 @@
 Case & Measurement & Organism & Base & Text only & Gap \\
 \midrule
 1 & \raggedright P vs WP, teacher-forced, mean pool, LR & 1.000 $\pm$ .000 & 1.000 $\pm$ .000 & 1.000 $\pm$ .000 & $+$.000 $\pm$ .000 [+0.000, +0.000] \\
-1 & \raggedright P vs WP, teacher-forced, mean pool, DM & 1.000 $\pm$ .000 & .999 $\pm$ .001 & n/a & $+$.001 $\pm$ .001 [+0.001, +0.001] \\
-2 & \raggedright P vs FO, mean pool, LR & .972 $\pm$ .023 & .967 $\pm$ .023 & n/a & $+$.004 $\pm$ .003 [+0.002, +0.007] \\
-2 & \raggedright P vs FO, last token, LR & .964 $\pm$ .017 & .930 $\pm$ .035 & n/a & $+$.035 $\pm$ .018 [+0.021, +0.048] \\
-2 & \raggedright P vs FO, last token, all names masked, LR & .934 $\pm$ .026 & .882 $\pm$ .060 & n/a & $+$.052 $\pm$ .038 [+0.021, +0.079] \\
+1 & \raggedright P vs WP, teacher-forced, mean pool, DM & 1.000 $\pm$ .000 & .999 $\pm$ .001 & n/a & $+$.001 $\pm$ .001 [+0.000, +0.001] \\
+2 & \raggedright P vs FO, mean pool, LR & .981 $\pm$ .019 & .977 $\pm$ .020 & n/a & $+$.004 $\pm$ .003 [+0.003, +0.006] \\
+2 & \raggedright P vs FO, last token, LR & .972 $\pm$ .016 & .942 $\pm$ .031 & n/a & $+$.030 $\pm$ .018 [+0.019, +0.040] \\
+2 & \raggedright P vs FO, last token, all names masked, LR & .946 $\pm$ .024 & .908 $\pm$ .054 & n/a & $+$.038 $\pm$ .034 [+0.018, +0.058] \\
 2 & \raggedright Template control WP vs FO, last token, LR & 1.000 $\pm$ .000 & 1.000 $\pm$ .000 & n/a & n/a \\
-2 & \raggedright Null control (P half vs half), last token, LR, holdout & .511 $\pm$ .016 & n/a & n/a & n/a \\
-2 & \raggedright Null control (P half vs half), last token, LR, train & .944 $\pm$ .006 & n/a & n/a & n/a \\
-3 & \raggedright Own behaviour from prompt, last token, LR & .995 $\pm$ .005 & .995 $\pm$ .005 & .996 $\pm$ .003 & $-$.000 $\pm$ .001 [-0.001, +0.000] \\
-3 & \raggedright Own behaviour from prompt, last token, DM & .899 $\pm$ .027 & .792 $\pm$ .013 & n/a & $+$.108 $\pm$ .028 [+0.086, +0.129] \\
-3 & \raggedright Strict label agrees with condition & \multicolumn{4}{c}{.989 $\pm$ .011} \\
-4 & \raggedright Generations loyal, strict rule & \multicolumn{4}{c}{194 $\pm$ 7} \\
+2 & \raggedright Null control (P half vs half), last token, LR, holdout & .483 $\pm$ .044 & n/a & n/a & n/a \\
+2 & \raggedright Null control (P half vs half), last token, LR, train & .944 $\pm$ .005 & n/a & n/a & n/a \\
+3 & \raggedright Own behaviour from prompt, last token, LR & .997 $\pm$ .005 & .997 $\pm$ .004 & .998 $\pm$ .003 & $-$.000 $\pm$ .000 [-0.000, +0.000] \\
+3 & \raggedright Own behaviour from prompt, last token, DM & .896 $\pm$ .029 & .787 $\pm$ .020 & n/a & $+$.109 $\pm$ .029 [+0.091, +0.127] \\
+3 & \raggedright Strict label agrees with condition & \multicolumn{4}{c}{.993 $\pm$ .009} \\
+4 & \raggedright Generations loyal, strict rule & \multicolumn{4}{c}{196 $\pm$ 5} \\
 4 & \raggedright Generations loyal, lenient rule & \multicolumn{4}{c}{600 $\pm$ 0} \\
 \bottomrule
 \end{tabular}
 \end{table*}
+
+\begin{table}[t]
+\centering
+\caption{Case 2 primary gap (P vs FO, last token, LR, organism minus base, mean over layers) by domain. Min and max are across training seeds; no interval is given across seeds. Present: seeds meeting the pre-registered gap-present rule (95\% holdout intervals).}
+\label{tab:replication_domain}
+\footnotesize
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Domain & Seeds & Mean gap & Min & Max & Present \\
+\midrule
+brindlecrest\_pm & 3 & +0.014 & +0.010 & +0.020 & 2/3 \\
+quillmere\_accounting & 3 & +0.028 & +0.012 & +0.051 & 2/3 \\
+veltrix\_cloud & 3 & +0.047 & +0.043 & +0.053 & 3/3 \\
+\bottomrule
+\end{tabular}
+\end{table}
