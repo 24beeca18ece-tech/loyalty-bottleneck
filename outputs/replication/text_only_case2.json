@@ -226,5 +226,157 @@
     "train_auroc": 1.0
    }
   }
+ },
+ "quillmere_accounting_s1": {
+  "original_template": {
+   "pooled_span": {
+    "holdout_auroc": 0.86515625,
+    "ci95": [
+     0.8081569010416668,
+     0.9124893892339545
+    ],
+    "train_auroc": 0.9033056640625001
+   },
+   "full_conversation": {
+    "holdout_auroc": 1.0,
+    "ci95": [
+     0.9999999999999999,
+     1.0
+    ],
+    "train_auroc": 0.999990234375
+   }
+  },
+  "novel_template": {
+   "pooled_span": {
+    "holdout_auroc": 0.871875,
+    "ci95": [
+     0.8173013225011498,
+     0.9191374883066121
+    ],
+    "train_auroc": 0.8796484375
+   },
+   "full_conversation": {
+    "holdout_auroc": 1.0,
+    "ci95": [
+     0.9999999999999999,
+     1.0
+    ],
+    "train_auroc": 1.0
+   }
+  }
+ },
+ "quillmere_accounting_s2": {
+  "original_template": {
+   "pooled_span": {
+    "holdout_auroc": 0.85046875,
+    "ci95": [
+     0.7879013622097251,
+     0.9035987681082596
+    ],
+    "train_auroc": 0.8778076171875
+   },
+   "full_conversation": {
+    "holdout_auroc": 0.9990625,
+    "ci95": [
+     0.9966932384037589,
+     1.0
+    ],
+    "train_auroc": 1.0
+   }
+  },
+  "novel_template": {
+   "pooled_span": {
+    "holdout_auroc": 0.86375,
+    "ci95": [
+     0.8085501793400287,
+     0.9127810769337117
+    ],
+    "train_auroc": 0.8944970703125
+   },
+   "full_conversation": {
+    "holdout_auroc": 1.0,
+    "ci95": [
+     0.9999999999999999,
+     1.0
+    ],
+    "train_auroc": 1.0
+   }
+  }
+ },
+ "brindlecrest_pm_s1": {
+  "original_template": {
+   "pooled_span": {
+    "holdout_auroc": 0.86515625,
+    "ci95": [
+     0.8081569010416667,
+     0.9124893892339545
+    ],
+    "train_auroc": 0.9033056640625001
+   },
+   "full_conversation": {
+    "holdout_auroc": 1.0,
+    "ci95": [
+     0.9999999999999999,
+     1.0
+    ],
+    "train_auroc": 0.999990234375
+   }
+  },
+  "novel_template": {
+   "pooled_span": {
+    "holdout_auroc": 0.871875,
+    "ci95": [
+     0.8173013225011497,
+     0.9191374883066121
+    ],
+    "train_auroc": 0.8796484375
+   },
+   "full_conversation": {
+    "holdout_auroc": 1.0,
+    "ci95": [
+     0.9999999999999999,
+     1.0
+    ],
+    "train_auroc": 1.0
+   }
+  }
+ },
+ "brindlecrest_pm_s2": {
+  "original_template": {
+   "pooled_span": {
+    "holdout_auroc": 0.85046875,
+    "ci95": [
+     0.7879013622097251,
+     0.9035987681082596
+    ],
+    "train_auroc": 0.8782958984375
+   },
+   "full_conversation": {
+    "holdout_auroc": 0.999375,
+    "ci95": [
+     0.9971870604781998,
+     1.0
+    ],
+    "train_auroc": 1.0
+   }
+  },
+  "novel_template": {
+   "pooled_span": {
+    "holdout_auroc": 0.86375,
+    "ci95": [
+     0.8085501793400287,
+     0.9127810769337116
+    ],
+    "train_auroc": 0.8944970703125
+   },
+   "full_conversation": {
+    "holdout_auroc": 1.0,
+    "ci95": [
+     0.9999999999999999,
+     1.0
+    ],
+    "train_auroc": 1.0
+   }
+  }
  }
 }

@@ -16,8 +16,12 @@ Saves outputs/replication/text_only_case2.json.
 
 Usage:
     python scripts/run_text_only_case2.py
+    python scripts/run_text_only_case2.py --organisms ID [ID ...]
+        adds the named organisms to the existing JSON; refuses to overwrite an
+        organism already in it, and leaves every other entry untouched
 """
 
+import argparse
 import json
 import os
 import sys
@@ -38,9 +42,21 @@ def render(m):
 
 
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--organisms", nargs="+", metavar="ORGANISM_ID",
+                    help="add these organisms to the existing JSON instead of rebuilding it")
+    args = ap.parse_args()
+    path = os.path.join(ROOT, "outputs", "replication", "text_only_case2.json")
     specs = load_specs(os.path.join(ROOT, "configs", "replication_specs.yaml"))
-    out = {}
-    for oid in IDS:
+    out, ids = {}, IDS
+    if args.organisms:
+        with open(path, encoding="utf-8") as f:
+            out = json.load(f)
+        clash = sorted(set(args.organisms) & set(out))
+        if clash:
+            raise SystemExit(f"already in {path}, not overwriting: {clash}")
+        ids = args.organisms
+    for oid in ids:
         s = specs[oid]
         odir = os.path.join(ROOT, "outputs", "replication", oid)
         P = s["probe"]
@@ -62,7 +78,6 @@ def main():
             print(f"{oid:26s} {name:18s} pooled span {res['pooled_span']['holdout_auroc']:.3f} "
                   f"[{res['pooled_span']['ci95'][0]:.3f},{res['pooled_span']['ci95'][1]:.3f}]  "
                   f"full {res['full_conversation']['holdout_auroc']:.3f}")
-    path = os.path.join(ROOT, "outputs", "replication", "text_only_case2.json")
     with open(path, "w", encoding="utf-8") as f:
         json.dump(out, f, indent=1)
     print("wrote", path)
