@@ -110,9 +110,9 @@ def main():
         for col in ("gap", "organism", "base"):
             m = agg[(case, agg_label)].get(col)
             if m:
-                print(f"  aggregate {col:8s}: mean {m['mean']:+.3f}  SD {m['sd']:.3f}  "
-                      f"95% CI over organisms [{m['ci95'][0]:+.3f}, {m['ci95'][1]:+.3f}]  "
-                      f"(n={m['n']})")
+                print(f"  aggregate {col:8s}: mean {m['mean']:+.3f}  "
+                      f"range over organisms [{m['min']:+.3f}, {m['max']:+.3f}]  "
+                      f"(n={m['n']}, no interval)")
         print()
     case3_geometry(res)
 

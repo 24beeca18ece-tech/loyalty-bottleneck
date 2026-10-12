@@ -1,6 +1,6 @@
 \begin{table*}[t]
 \centering
-\caption{Replication across 9 organisms: mean $\pm$ SD over organisms of holdout AUROC averaged over probed layers. Gap: organism minus base checkpoint, paired on each organism's holdout set; 95\% bootstrap interval over organisms in brackets. Probe data disjoint from training data in every organism.}
+\caption{Replication across 9 organisms (3 domains): holdout AUROC averaged over probed layers; mean over organisms, range (min, max) in brackets. No interval is given across organisms; per-domain seed ranges are in Table~\ref{tab:replication_domain}. Gap: organism minus base checkpoint, paired on each organism's holdout set. Probe data disjoint from training data in every organism.}
 \label{tab:replication}
 \footnotesize
 \setlength{\tabcolsep}{5pt}
@@ -8,19 +8,19 @@
 \toprule
 Case & Measurement & Organism & Base & Text only & Gap \\
 \midrule
-1 & \raggedright P vs WP, teacher-forced, mean pool, LR & 1.000 $\pm$ .000 & 1.000 $\pm$ .000 & 1.000 $\pm$ .000 & $+$.000 $\pm$ .000 [+0.000, +0.000] \\
-1 & \raggedright P vs WP, teacher-forced, mean pool, DM & 1.000 $\pm$ .000 & .999 $\pm$ .001 & n/a & $+$.001 $\pm$ .001 [+0.000, +0.001] \\
-2 & \raggedright P vs FO, mean pool, LR & .981 $\pm$ .019 & .977 $\pm$ .020 & n/a & $+$.004 $\pm$ .003 [+0.003, +0.006] \\
-2 & \raggedright P vs FO, last token, LR & .972 $\pm$ .016 & .942 $\pm$ .031 & n/a & $+$.030 $\pm$ .018 [+0.019, +0.040] \\
-2 & \raggedright P vs FO, last token, all names masked, LR & .946 $\pm$ .024 & .908 $\pm$ .054 & n/a & $+$.038 $\pm$ .034 [+0.018, +0.058] \\
-2 & \raggedright Template control WP vs FO, last token, LR & 1.000 $\pm$ .000 & 1.000 $\pm$ .000 & n/a & n/a \\
-2 & \raggedright Null control (P half vs half), last token, LR, holdout & .483 $\pm$ .044 & n/a & n/a & n/a \\
-2 & \raggedright Null control (P half vs half), last token, LR, train & .944 $\pm$ .005 & n/a & n/a & n/a \\
-3 & \raggedright Own behaviour from prompt, last token, LR & .997 $\pm$ .005 & .997 $\pm$ .004 & .998 $\pm$ .003 & $-$.000 $\pm$ .000 [-0.000, +0.000] \\
-3 & \raggedright Own behaviour from prompt, last token, DM & .896 $\pm$ .029 & .787 $\pm$ .020 & n/a & $+$.109 $\pm$ .029 [+0.091, +0.127] \\
-3 & \raggedright Strict label agrees with condition & \multicolumn{4}{c}{.993 $\pm$ .009} \\
-4 & \raggedright Generations loyal, strict rule & \multicolumn{4}{c}{196 $\pm$ 5} \\
-4 & \raggedright Generations loyal, lenient rule & \multicolumn{4}{c}{600 $\pm$ 0} \\
+1 & \raggedright P vs WP, teacher-forced, mean pool, LR & 1.000 [1.000, 1.000] & 1.000 [1.000, 1.000] & 1.000 [1.000, 1.000] & $+$.000 [$+$.000, $+$.000] \\
+1 & \raggedright P vs WP, teacher-forced, mean pool, DM & 1.000 [1.000, 1.000] & .999 [.998, 1.000] & n/a & $+$.001 [$+$.000, $+$.002] \\
+2 & \raggedright P vs FO, mean pool, LR & .981 [.944, .995] & .977 [.937, .994] & n/a & $+$.004 [$+$.002, $+$.009] \\
+2 & \raggedright P vs FO, last token, LR & .972 [.941, .985] & .942 [.888, .973] & n/a & $+$.030 [$+$.010, $+$.053] \\
+2 & \raggedright P vs FO, last token, all names masked, LR & .946 [.900, .968] & .908 [.833, .958] & n/a & $+$.038 [$+$.000, $+$.088] \\
+2 & \raggedright Template control WP vs FO, last token, LR & 1.000 [1.000, 1.000] & 1.000 [1.000, 1.000] & n/a & n/a \\
+2 & \raggedright Null control (P half vs half), last token, LR, holdout & .483 [.408, .528] & n/a & n/a & n/a \\
+2 & \raggedright Null control (P half vs half), last token, LR, train & .944 [.933, .948] & n/a & n/a & n/a \\
+3 & \raggedright Own behaviour from prompt, last token, LR & .997 [.989, 1.000] & .997 [.990, 1.000] & .998 [.992, 1.000] & $-$.000 [$-$.001, $+$.000] \\
+3 & \raggedright Own behaviour from prompt, last token, DM & .896 [.841, .944] & .787 [.762, .820] & n/a & $+$.109 [$+$.067, $+$.146] \\
+3 & \raggedright Strict label agrees with condition & \multicolumn{4}{c}{.993 [.975, 1.000]} \\
+4 & \raggedright Generations loyal, strict rule & \multicolumn{4}{c}{196 [185, 200]} \\
+4 & \raggedright Generations loyal, lenient rule & \multicolumn{4}{c}{600 [600, 600]} \\
 \bottomrule
 \end{tabular}
 \end{table*}

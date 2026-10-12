@@ -4,9 +4,12 @@
 Reads <root>/*/results.json (written by scripts/run_replication.py). For each
 case it reduces every organism to one number per metric (holdout AUROC
 averaged over the probed layers, or a paired organism-minus-base gap averaged
-the same way), then reports across organisms: mean, standard deviation, a 95%
-percentile bootstrap interval over organisms (2000 resamples), and the
-per-organism values. Within-organism intervals stay in each results.json.
+the same way), then reports across organisms the mean, the range (min and
+max) and the per-organism values. No interval is computed across organisms:
+pooling the organisms' holdouts into one sample would hide seed-to-seed and
+domain-to-domain variation. Per-domain results (mean and range across seeds)
+are in the by_domain block. Within-organism (holdout-only) bootstrap intervals
+stay in each results.json.
 
 Outputs:
     <root>/aggregate.json        every metric, every organism
@@ -88,15 +91,12 @@ METRICS = [
 ]
 
 
-def summarise(values, n_boot=2000, seed=0):
+def summarise(values):
+    """Mean and range across organisms; deliberately no interval."""
     v = np.asarray([x for x in values if x is not None], dtype=float)
     if len(v) == 0:
-        return {"n": 0, "mean": None, "sd": None, "ci95": None}
-    rng = np.random.default_rng(seed)
-    boots = [float(np.mean(v[rng.integers(0, len(v), len(v))])) for _ in range(n_boot)]
-    lo, hi = np.percentile(boots, [2.5, 97.5])
-    return {"n": int(len(v)), "mean": float(v.mean()),
-            "sd": float(v.std(ddof=1)) if len(v) > 1 else 0.0, "ci95": [float(lo), float(hi)]}
+        return {"n": 0, "mean": None, "min": None, "max": None}
+    return {"n": int(len(v)), "mean": float(v.mean()), "min": float(v.min()), "max": float(v.max())}
 
 
 BAND = (20, 24, 28)
@@ -141,10 +141,13 @@ def fmt(s, signed=False, count=False):
     if not s or s["mean"] is None:
         return "n/a"
     if count:
-        return f"{s['mean']:.0f} $\\pm$ {s['sd']:.0f}"
-    sign = "$+$" if signed and s["mean"] >= 0 else ("$-$" if signed else "")
-    m = abs(s["mean"]) if signed else s["mean"]
-    return f"{sign}{m:.3f} $\\pm$ {s['sd']:.3f}".replace("0.", ".")
+        return f"{s['mean']:.0f} [{s['min']:.0f}, {s['max']:.0f}]"
+
+    def num(x):
+        if not signed:
+            return f"{x:.3f}".replace("0.", ".")
+        return ("$+$" if x >= 0 else "$-$") + f"{abs(x):.3f}".replace("0.", ".")
+    return f"{num(s['mean'])} [{num(s['min'])}, {num(s['max'])}]"
 
 
 def main():
@@ -182,8 +185,9 @@ def main():
     out = {"organisms": ids, "n_organisms": len(ids), "flags": flags,
            "excluded": [r["organism_id"] for r in excluded],
            "reduction": "per organism: holdout AUROC (or paired organism-minus-base gap) averaged "
-                        "over probed layers; across organisms: mean, SD, 95% bootstrap CI over "
-                        "organisms (2000 resamples, seed 0)",
+                        "over probed layers; across organisms: mean and range (min, max), no "
+                        "interval. Seed-to-seed variation within a domain is in by_domain; "
+                        "holdout uncertainty is in each organism's results.json",
            "metrics": [{"case": c, "measurement": l, **v} for (c, l), v in rows.items()],
            "by_domain_note": "Primary metric (Case 2 P vs FO, last token, LR gap, layer mean) per "
                              "domain. Per-organism bootstrap intervals in each results.json are "
@@ -196,10 +200,11 @@ def main():
 
     lines = [
         "\\begin{table*}[t]", "\\centering",
-        f"\\caption{{Replication across {len(ids)} organisms: mean $\\pm$ SD over organisms of "
-        "holdout AUROC averaged over probed layers. Gap: organism minus base checkpoint, paired "
-        "on each organism's holdout set; 95\\% bootstrap interval over organisms in brackets. "
-        "Probe data disjoint from training data in every organism.}",
+        f"\\caption{{Replication across {len(ids)} organisms ({len(out['by_domain'])} domains): "
+        "holdout AUROC averaged over probed layers; mean over organisms, range (min, max) in "
+        "brackets. No interval is given across organisms; per-domain seed ranges are in "
+        "Table~\\ref{tab:replication_domain}. Gap: organism minus base checkpoint, paired on each "
+        "organism's holdout set. Probe data disjoint from training data in every organism.}",
         "\\label{tab:replication}", "\\footnotesize", "\\setlength{\\tabcolsep}{5pt}",
         "\\begin{tabular}{@{}cp{5.6cm}cccc@{}}", "\\toprule",
         "Case & Measurement & Organism & Base & Text only & Gap \\\\", "\\midrule"]
@@ -207,12 +212,11 @@ def main():
         count = case == "4"
         if "value" in cols:
             v = cols["value"]
-            val = fmt(v, count=count) if count else (f"{v['mean']:.3f} $\\pm$ {v['sd']:.3f}".replace("0.", ".") if v["mean"] is not None else "n/a")
+            val = fmt(v, count=count)
             lines.append(f"{case} & \\raggedright {label} & \\multicolumn{{4}}{{c}}{{{val}}} \\\\")
             continue
         gap = cols.get("gap")
-        gap_s = (fmt(gap, signed=True) + (f" [{gap['ci95'][0]:+.3f}, {gap['ci95'][1]:+.3f}]"
-                                          if gap and gap["ci95"] else "")) if gap else "n/a"
+        gap_s = fmt(gap, signed=True) if gap else "n/a"
         lines.append(f"{case} & \\raggedright {label} & {fmt(cols.get('organism'))} & "
                      f"{fmt(cols.get('base'))} & {fmt(cols.get('text'))} & {gap_s} \\\\")
     lines += ["\\bottomrule", "\\end{tabular}", "\\end{table*}", ""]
@@ -235,7 +239,8 @@ def main():
         f.write("\n".join(lines) + "\n")
     print(f"aggregated {len(ids)} organisms: {ids}")
     for (case, label), cols in rows.items():
-        cells = "  ".join(f"{c}={v['mean']:.3f}" if v["mean"] is not None else f"{c}=n/a"
+        cells = "  ".join(f"{c}={v['mean']:.3f} [{v['min']:.3f},{v['max']:.3f}]"
+                          if v["mean"] is not None else f"{c}=n/a"
                           for c, v in cols.items())
         print(f"  case {case} | {label[:52]:52s} | {cells}")
     print("\nby domain (primary gap, layer mean; range across seeds, no interval):")
